@@ -105,7 +105,28 @@ function drawSolo(){
    if(mode==='pent')box=[f,f+12].filter(v=>v+3<=15)}
   for(let s=0;s<6;s++)for(let f=0;f<=15;f++){const pc=(OPEN[s]+f)%12,rel=(pc-ref+12)%12;if(set.includes(rel))marks.push({s,f,k:rel===0?'home':'note',t:lab==='deg'?DEG[rel]:nn(pc)})}
  }
- $('fbc').innerHTML=cap;const o={frets:15,marks,box,lefty};if(!$('p-solo').hidden)setBoard($('fb1'),o);else $('fb1')._o=o;
+ $('fbc').innerHTML=cap;$('mDesc').innerHTML=x.mDesc[mode];renderSoloGuide();const o={frets:15,marks,box,lefty};if(!$('p-solo').hidden)setBoard($('fb1'),o);else $('fb1')._o=o;
+}
+/* --- how to solo over this song --- */
+function renderSoloGuide(){
+ const g=$('sGuide'),x=X(),{k,us}=A;if(!k){g.innerHTML='';return}
+ const wasOpen=g.open,key=keyName(k),home=nn(k.t),pentI=k.minor?[0,3,5,7,10]:[0,2,4,7,9],scI=k.minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11];
+ const pent=pentI.map(t=>nn(k.t+t)),extra=scI.filter(t=>!pentI.includes(t)).map(t=>nn(k.t+t));
+ const mr=k.minor?k.t:(k.t+9)%12,fret=(mr-4+12)%12||12;
+ const rows=us.slice(0,8).map(c=>`<tr><td><b>${esc(cname(c))}</b></td><td>${tones(c).map(t=>nn(c.root+t)).join(' ')}</td></tr>`).join('');
+ g.innerHTML=`<summary>🎸 ${x.sgT}</summary><div class="sgb">
+ <ol class="sgsteps">
+  <li><b>${x.sg1T}</b> ${x.sg1(key,home)}</li>
+  <li><b>${x.sg2T}</b> ${x.sg2(pent.join(' '),fret,k.minor?'':nn(mr))} <button class="link" data-sm="pent">${x.sgShow}</button></li>
+  <li><b>${x.sg3T}</b> ${x.sg3(extra.join(tr(' a ',' and ')))} <button class="link" data-sm="scale">${x.sgShow}</button></li>
+  <li><b>${x.sg4T}</b> ${x.sg4} <table class="sgt">${rows}</table><button class="link" data-sm="chord">${x.sgShow}</button></li>
+  <li><b>${x.sg5T}</b> ${x.sg5(home)}</li>
+ </ol>
+ <div class="row">${pbtn('▶ '+x.sgHear,pentI.concat(12).map(t=>52+((k.t-4+12)%12)+t),{notes:true,step:.34,cls:'fire'})}<button id="sgJam">${x.sgJam}</button><button id="sgLes">${x.sgLes}</button></div></div>`;
+ g.open=wasOpen;
+ g.querySelectorAll('[data-sm]').forEach(b=>b.onclick=()=>{mode=b.dataset.sm;drawSolo();setBoard($('fb1'),$('fb1')._o);$('fb1').scrollIntoView({behavior:'smooth',block:'center'})});
+ $('sgJam').onclick=()=>{go('five');fiveGo('jam')};
+ $('sgLes').onclick=()=>{go('lessons');const i=lessons().findIndex(l=>l.id==='imp1');if(i>=0)lesGo(i)};
 }
 /* --- Proč? (bottom of Rozbor) --- */
 function renderWhy(){
