@@ -168,10 +168,15 @@ function actx(){if(!ac){aSess('playback');ac=new (window.AudioContext||window.we
    - a short silent <audio> element does the same on older iOS
    - resume the AudioContext inside the gesture */
 const SILENT='data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUAGAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA';
-let unlocked=false,silentEl=null;
-function unlockAudio(){try{actx();if(ac.state==='running'&&unlocked)return;const o=ac.createOscillator(),g=ac.createGain();g.gain.value=0;o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.02);
- if(!silentEl){silentEl=new Audio(SILENT);silentEl.setAttribute('playsinline','');silentEl.preload='auto'}const pr=silentEl.play();if(pr&&pr.then)pr.then(()=>{unlocked=true}).catch(()=>{});else unlocked=true}catch(e){}}
-['pointerdown','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
+let silentEl=null;
+/* iPhone silent switch: Web Audio follows the ringer unless an HTML <audio> element is *playing*.
+   So a silent track loops quietly the whole time the app is open (paused when the app is hidden). */
+function unlockAudio(){try{actx();if(!Mic.stream)aSess('playback');
+ if(!silentEl){silentEl=new Audio(SILENT);silentEl.loop=true;silentEl.setAttribute('playsinline','');silentEl.setAttribute('x-webkit-airplay','deny');silentEl.preload='auto';silentEl.volume=.01}
+ if(silentEl.paused){const pr=silentEl.play();if(pr&&pr.catch)pr.catch(()=>{})}
+ if(ac.state!=='running')ac.resume()}catch(e){}}
+document.addEventListener('visibilitychange',()=>{if(!silentEl)return;if(document.hidden)silentEl.pause()});
+['touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ac&&ac.state!=='running')try{ac.resume()}catch(e){}});
 function pluckBuf(m){if(bufs[m])return bufs[m];const f=440*2**((m-69)/12),sr=ac.sampleRate,len=Math.floor(sr*1.8),N=Math.max(2,Math.round(sr/f)),b=ac.createBuffer(1,len,sr),d=b.getChannelData(0);
  let p=0;for(let i=0;i<N;i++){const r=Math.random()*2-1;d[i]=(r+p)*.5;p=r}for(let i=N;i<len;i++)d[i]=.4985*(d[i-N]+d[i-N+1]);return bufs[m]=b}
@@ -180,6 +185,7 @@ function voicing(c){if(c.midis)return c.midis;const b=40+(((c.bass??c.root)-4+12
 function strum(c,t,dir,g,dest,dur){let ms=voicing(c);if(dir==='U')ms=ms.slice().reverse().slice(0,4);ms.forEach((m,j)=>note(m,t+j*(dir==='U'?.012:.02),g,dest,dur))}
 function stopPlay(){playT.forEach(clearTimeout);playT=[];if(master){try{master.disconnect()}catch(e){}master=null}document.querySelectorAll('.lit').forEach(e=>e.classList.remove('lit'));document.querySelectorAll('[data-pl].playing').forEach(b=>{b.classList.remove('playing');b.textContent=b.dataset.lbl})}
 function play(items,btn,step=1.15,notes=false){
+ if(!Mic.on&&Mic.stream&&typeof micRelease==='function')micRelease(); // a held mic would route sound to the quiet earpiece on iPhone
  const was=btn&&btn.classList.contains('playing');stopPlay();if(was)return;
  try{actx()}catch(e){return}master=ac.createGain();master.gain.value=.7;master.connect(ac.destination);
  const t0=ac.currentTime+.06;
@@ -192,7 +198,7 @@ function play(items,btn,step=1.15,notes=false){
 function pling(m){try{actx();const g=ac.createGain();g.gain.value=.6;g.connect(ac.destination);note(m,ac.currentTime+.02,.6,g)}catch(e){}}
 function click(t,acc,dest){const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=acc?1600:1000;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(acc?.5:.3,t+.002);g.gain.exponentialRampToValueAtTime(.0001,t+.05);o.connect(g).connect(dest||ac.destination);o.start(t);o.stop(t+.06)}
 const reg={};let regN=0;
-const pbtn=(lbl,items,o={})=>{const id='p'+(regN++);reg[id]={items,...o};return `<button class="${o.cls||''}" data-pl="${id}" data-lbl="${esc(lbl)}">${esc(lbl)}</button>`};
+const pbtn=(lbl0,items,o={})=>{const lbl=String(lbl0).replace(/▶(?!\uFE0E)/g,'▶\uFE0E');const id='p'+(regN++);reg[id]={items,...o};return `<button class="${o.cls||''}" data-pl="${id}" data-lbl="${esc(lbl)}">${esc(lbl)}</button>`};
 document.addEventListener('click',e=>{const b=e.target.closest('[data-pl]');if(!b)return;const r=reg[b.dataset.pl];if(!r)return;if(r.act)return r.act();play(r.items,b,r.step||1.15,r.notes)});
 
 /* ---------- fretboard ---------- */
