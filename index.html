@@ -2,594 +2,176 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Proč to zní</title>
 <meta name="theme-color" content="#1c4634">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Proč to zní">
+<link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <link rel="icon" type="image/png" href="icon-512.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet">
-<style>
-/* VOICE everyday hobby tool, friendly, few words, learning by ear
-   IDEA a campfire songbook laid on a guitar neck: chords on top, the neck below shows where they live
-   PICTURE the rosewood fretboard with lit notes, plus chord cards named by their role
-   COLOUR forest green band, white ground, fire orange for "home", pearl inlays, rosewood
-   TYPE Barlow Condensed for names and chords, Barlow for text
-   LAYOUT laptop: input left, analysis right, neck full width; phone: title, songs, analysis, neck, input */
-:root{color-scheme:light dark;--bg:light-dark(#ffffff,#0e1512);--ink:light-dark(#14201a,#ecf1ed);--mut:light-dark(#55635b,#9fb0a6);--forest:light-dark(#1c4634,#12301f);--panel:light-dark(#f3f6f3,#16211b);--line:light-dark(#d5ddd7,#2a3a31);--fire:#ff5a1f;--fireInk:light-dark(#c63d0b,#ff8a5c);--wood:#3a2318;--pearl:#f5efe2;--leaf:light-dark(#2e7a57,#5cc493);--bad:light-dark(#b42318,#ff8577)}
-:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
-*{box-sizing:border-box;min-width:0}
-body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Barlow,system-ui,sans-serif;overflow-x:clip}
-.band{padding-block:clamp(22px,3.4vw,48px);padding-inline:max(5vw,16px)}
-.in{max-width:1240px;margin:0 auto}
-h1,h2,.key,.cn,.big{font-family:"Barlow Condensed",Barlow,sans-serif;letter-spacing:-.01em;line-height:1.05;margin:0}
-[hidden]{display:none!important}
-.top{background:var(--forest);color:#fff;padding-bottom:20px}
-.hrow{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between}
-.top h1{font-size:clamp(36px,5vw,52px)}
-.top p{margin:4px 0 0;color:#cfe3d7}
-.ctl{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-.top .seg{background:transparent;border-color:#ffffff55}
-.top .seg button{background:transparent;color:#fff}
-.top .seg button.on{background:#fff;color:var(--forest)}
-.lvb{background:transparent;color:#fff;border-color:#ffffff55}
-.tabs{display:flex;gap:6px;margin-top:18px;border-bottom:1px solid #ffffff33}
-.tabs button{background:transparent;color:#cfe3d7;border:0;border-bottom:3px solid transparent;border-radius:0;font:700 20px "Barlow Condensed",sans-serif;padding:0 14px}
-.tabs button.on{color:#fff;border-bottom-color:var(--fire)}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
-.chip{border:1px solid #ffffff55;background:transparent;color:#fff;border-radius:999px;padding:9px 15px;font:500 15px Barlow,sans-serif;min-height:42px;cursor:pointer}
-.chip.on{background:#fff;color:var(--forest);border-color:#fff}
-.chip.add{border-style:dashed}
-.top .note{font-size:13px;color:#b9d3c4;margin-top:10px}
-.work .in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:28px;align-items:start}
-.panel{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px}
-label,.lbl{display:flex;align-items:center;gap:6px;font-size:14px;color:var(--mut);font-weight:500;margin:0 0 6px}
-input[type=text],textarea{width:100%;font:16px/1.45 Barlow,sans-serif;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin-bottom:14px}
-#tx{resize:vertical;min-height:170px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:15px}
-input:focus-visible,textarea:focus-visible,button:focus-visible,a:focus-visible{outline:3px solid var(--fire);outline-offset:2px}
-.find{display:inline-flex;align-items:center;min-height:44px;margin:-8px 0 8px;color:var(--leaf);font-weight:600}
-.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
-button{font:600 15px Barlow,sans-serif;min-height:44px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);cursor:pointer}
-button:hover{border-color:var(--mut)}
-button.pri{background:var(--forest);color:#fff;border-color:var(--forest)}
-button.fire{background:var(--fire);color:#fff;border-color:var(--fire)}
-button.sq{width:44px;padding:0;font-size:20px}
-.q{width:30px;height:30px;min-height:30px;padding:0;border-radius:50%;font-size:14px;color:var(--leaf);border-color:currentColor;background:transparent;flex:none}
-.set{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
-.set output{min-width:2.6em;text-align:center;font:700 20px "Barlow Condensed",sans-serif}
-.sw{margin:12px 0 0;color:var(--ink);font-size:15px;cursor:pointer}
-.sw input{width:20px;height:20px;accent-color:var(--forest)}
-.msg{font-size:14px;color:var(--leaf);min-height:20px;margin-top:8px}
-.keyrow{display:flex;flex-wrap:wrap;gap:12px 24px;align-items:flex-end;justify-content:space-between}
-.key{font-size:clamp(44px,6vw,64px);font-weight:700}
-.key b{color:var(--fireInk);font-weight:700}
-.muted{color:var(--mut);font-size:15px}
-.t{font-size:14px;color:var(--mut);margin:0}
-.pat{margin-top:20px;border-left:4px solid var(--fire);padding:4px 0 4px 16px}
-.pat .big{font-size:28px;font-weight:700}
-.pat p{margin:6px 0}
-.path{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:10px 0}
-.path i{font-style:normal;color:var(--mut);font-size:18px}
-.pc{display:flex;flex-direction:column;border:1px solid var(--line);border-radius:10px;padding:5px 10px;background:var(--bg);transition:background .15s}
-.pc b{font:700 22px "Barlow Condensed",sans-serif;line-height:1.1}
-.pc small{font-size:13px;color:var(--mut)}
-.pc.home{border-color:var(--fire)}
-.pc.lit,.cd.lit{background:var(--fire);border-color:var(--fire);color:#fff}
-.pc.lit small{color:#fff}
-.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(108px,1fr));gap:10px;margin:22px 0 14px}
-.cd{text-align:left;padding:10px 12px 12px;height:auto;border-radius:12px;border:2px solid var(--line);background:var(--bg);display:flex;flex-direction:column;gap:2px;transition:background .15s}
-.cd .num{font:700 15px "Barlow Condensed",sans-serif;color:var(--mut)}
-.cd .cn{font-size:30px;font-weight:700}
-.cd .fn{font:500 14px Barlow,sans-serif;color:var(--mut)}
-.cd.home{border-color:var(--fire)}
-.cd.home .num,.cd.home .fn{color:var(--fireInk)}
-.cd.on{background:var(--forest);border-color:var(--forest);color:#fff}
-.cd.on .num,.cd.on .fn,.cd.lit .num,.cd.lit .fn{color:#fff}
-.sel{background:var(--panel);border-radius:12px;padding:14px 16px;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 16px;align-items:center}
-.sel .cn{font-size:40px;font-weight:700;grid-row:span 2}
-.sel p{margin:0}
-.sel button{grid-row:span 2}
-.capo{margin-top:18px}
-.caps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
-.cp{border:1px solid var(--line);border-radius:12px;padding:10px 14px}
-.cp b{font:700 18px "Barlow Condensed",sans-serif;display:block}
-.cp span{font:600 18px "Barlow Condensed",sans-serif;color:var(--fireInk);word-spacing:4px}
-.empty{color:var(--mut);padding:20px 0}
-.board{background:light-dark(#efe7dc,#17110d)}
-.bh{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:center;justify-content:space-between;margin-bottom:14px}
-.bh h2{font-size:clamp(28px,3.4vw,38px)}
-.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--bg)}
-.seg button{border:0;border-radius:0;min-height:42px;font-size:14px;padding:0 13px}
-.seg button.on{background:var(--wood);color:var(--pearl)}
-.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
-.fb{position:relative;width:max(100%,780px);height:260px}
-.fb>svg{position:absolute;inset:0;width:100%;height:100%}
-.cap{margin:12px 0 0;font-size:16px}
-.cap b{color:var(--fireInk)}
-.low .in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.7fr);gap:28px;align-items:start}
-.met .big{font-size:64px;font-weight:700;text-align:center}
-.met .big small{font-size:20px;color:var(--mut)}
-.dots{display:flex;justify-content:center;gap:10px;margin:8px 0 14px}
-.dot{width:18px;height:18px;border-radius:50%;background:var(--line)}
-.dot.hit{background:var(--leaf)}
-.dot.hit.one{background:var(--fire)}
-input[type=range]{width:100%;accent-color:var(--fire);height:32px;margin:4px 0 12px}
-.met .row{justify-content:center}
-.ask h2{font-size:30px}
-.faq{display:grid;gap:8px;margin-top:12px}
-.fq{border:1px solid var(--line);border-radius:12px;background:var(--bg)}
-.fq summary{cursor:pointer;padding:12px 14px;font-weight:600;min-height:44px;list-style-position:inside}
-.fq[open] summary{color:var(--fireInk)}
-.fq div{padding:0 14px 14px}
-.fq p{margin:0 0 10px}
-.fq p b{color:var(--fireInk)}
-.sugg{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.sugg button{font-weight:500;text-align:left;height:auto;padding:8px 12px;min-height:40px}
-#aq{min-height:64px;resize:vertical;margin-bottom:10px}
-.ans{white-space:pre-wrap;margin-top:14px;padding:14px 16px;border-radius:12px;background:var(--bg);border:1px solid var(--line)}
-.ans:empty{display:none}
-.les .in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2.2fr);gap:28px;align-items:start}
-.ll{display:flex;flex-direction:column;gap:8px}
-.ll button{text-align:left;display:flex;gap:10px;align-items:center;justify-content:flex-start;height:auto;padding:10px 12px}
-.ll button .n{width:28px;height:28px;border-radius:50%;background:var(--panel);display:grid;place-items:center;font-weight:700;flex:none}
-.ll button.dn .n{background:var(--leaf);color:#fff}
-.ll button.on{border-color:var(--forest);border-width:2px}
-.lesson h2{font-size:clamp(32px,4vw,44px);margin:2px 0 12px}
-.lesson .body{font-size:18px;max-width:62ch}
-.lesson .body b{color:var(--fireInk)}
-.exp{margin:18px 0 6px;padding:14px 16px;border-radius:12px;background:var(--panel)}
-.exp .row{margin-top:10px}
-.quiz{margin-top:22px;border-top:1px solid var(--line);padding-top:16px}
-.quiz .qq{font:700 22px "Barlow Condensed",sans-serif;margin:0 0 10px}
-.opts{display:grid;gap:8px;max-width:520px}
-.opts button{text-align:left;justify-content:flex-start;font-weight:500}
-.opts button.ok{background:var(--leaf);color:#fff;border-color:var(--leaf)}
-.opts button.no{border-color:var(--bad);color:var(--bad)}
-.qfb{min-height:24px;margin:10px 0 0}
-.nav{margin-top:18px}
-.ov{position:fixed;inset:0;background:#0b1410cc;display:grid;place-items:center;padding:16px;z-index:20}
-.box{background:var(--bg);color:var(--ink);border-radius:16px;padding:24px;max-width:520px;width:100%;max-height:100%;overflow:auto}
-.box h2{font-size:34px;margin-bottom:6px}
-.lv{display:grid;gap:10px;margin:16px 0}
-.lv button{text-align:left;height:auto;padding:12px 16px;display:block}
-.lv b{display:block;font:700 22px "Barlow Condensed",sans-serif}
-.lv span{color:var(--mut);font-weight:500}
-.sheet{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);width:min(560px,calc(100% - 24px));background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 10px 30px #0004;z-index:15}
-.sheet h3{margin:0 0 6px;font:700 24px "Barlow Condensed",sans-serif}
-.sheet p{margin:0 0 12px}
-@media(max-width:860px){.work .in,.low .in,.les .in{grid-template-columns:minmax(0,1fr)}.work .inp{order:2}.sel{grid-template-columns:auto minmax(0,1fr)}.sel button{grid-row:auto;grid-column:1/-1;justify-self:start}}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style>
+<link rel="stylesheet" href="app.css">
 </head>
 <body>
-<header class="band top"><div class="in">
-  <div class="hrow">
-    <div><h1>Proč to zní</h1><p data-t="sub"></p></div>
-    <div class="ctl"><div class="seg" id="lang"><button data-l="cs">CZ</button><button data-l="en">EN</button></div><button class="lvb" id="lvb"></button></div>
-  </div>
-  <div class="tabs"><button id="tabS" data-t="tabSong"></button><button id="tabL"></button></div>
-  <div class="chips" id="chips"></div>
-  <p class="note" data-t="note"></p>
-</div></header>
+<nav class="nav" id="nav" aria-label="Menu">
+  <div class="brand">Proč to zní</div>
+  <button data-v="song"><svg viewBox="0 0 24 24"><path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/></svg><span data-t="tSong"></span></button>
+  <button data-v="five"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2.5M9.5 2h5M12 2v3"/></svg><span data-t="tFive"></span></button>
+  <button data-v="lessons"><svg viewBox="0 0 24 24"><path d="M3 5.5C5.5 4 9 4 12 6c3-2 6.5-2 9-.5V19c-2.5-1.5-6-1.5-9 .5-3-2-6.5-2-9-.5z"/><path d="M12 6v13.5"/></svg><span data-t="tLes"></span></button>
+  <button data-v="tuner"><svg viewBox="0 0 24 24"><path d="M3.5 16a8.5 8.5 0 1 1 17 0"/><path d="M12 16l4-6"/><circle cx="12" cy="16" r="1.4"/></svg><span data-t="tTune"></span></button>
+  <button data-v="more"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg><span data-t="tMore"></span></button>
+</nav>
 
-<div id="vSong">
-<main class="band work"><div class="in">
-  <section class="panel inp">
-    <label for="nm" data-t="song"></label>
-    <input type="text" id="nm" autocomplete="off">
-    <a id="find" class="find" href="https://www.google.com/search?q=akordy" target="_blank" rel="noopener" data-t="find"></a>
-    <label for="tx" data-t="chordsLbl"></label>
-    <textarea id="tx" spellcheck="false"></textarea>
-    <div class="row"><button class="pri" id="save" data-t="save"></button><button id="new" data-t="newS"></button><button id="del" data-t="del"></button></div>
-    <div class="msg" id="msg"></div>
-    <div class="row set"><span data-t="transp"></span><button class="sq" id="tm" aria-label="-1">−</button><output id="to">0</output><button class="sq" id="tp" aria-label="+1">+</button><button id="t0" data-t="back"></button></div>
-    <label class="sw"><input type="checkbox" id="cz"> <span data-t="notation"></span></label>
-  </section>
-  <section id="ana"></section>
-</div></main>
-
-<section class="band board" id="board"><div class="in">
-  <div class="bh">
-    <h2 id="fbt"></h2>
-    <div class="row">
-      <div class="seg" id="mode"><button data-m="pent"></button><button data-m="scale"></button><button data-m="chord"></button></div>
-      <div class="seg" id="lab"><button data-l="name"></button><button data-l="deg"></button></div>
-    </div>
+<main>
+<section id="v-song">
+  <div class="songbar">
+    <button class="pick" id="pick"><span id="pickN"></span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg></button>
   </div>
-  <div class="scroll"><div class="fb" id="fb"><svg id="fs" aria-label="Fretboard"></svg></div></div>
-  <p class="cap" id="fbc"></p>
-</div></section>
-
-<section class="band low"><div class="in">
-  <div class="panel met">
-    <div class="lbl" data-t="metro"></div>
-    <div class="big"><span id="bpm">80</span> <small>BPM</small></div>
-    <div class="dots" id="dots"></div>
-    <input type="range" id="br" min="40" max="220" value="80" aria-label="BPM">
-    <div class="row"><button class="sq" id="bm" aria-label="-">−</button><button class="pri" id="go"></button><button id="tap" data-t="tap"></button><button class="sq" id="bp" aria-label="+">+</button></div>
-    <div class="row" style="margin-top:10px"><span class="muted" data-t="beats"></span><div class="seg" id="bt"><button data-b="2">2</button><button data-b="3">3</button><button data-b="4">4</button><button data-b="6">6</button></div></div>
-  </div>
-  <section class="panel ask" id="askP">
-    <h2 data-t="why"></h2>
-    <p class="t" data-t="whySub"></p>
+  <div class="seg3" id="sub"><button data-s="play" data-t="subPlay"></button><button data-s="chords" data-t="subChords"></button><button data-s="solo" data-t="subSolo"></button></div>
+  <div id="p-play"></div>
+  <div id="p-chords" hidden>
+    <div id="rozbor"></div>
+    <h2 class="sh2" data-t="whyT"></h2>
+    <p class="t" data-t="whySub" style="margin-bottom:10px"></p>
     <div class="faq" id="faq"></div>
-    <div id="aiBox" hidden>
-      <div class="lbl" style="margin-top:18px" data-t="ask"></div>
+    <div id="aiBox" hidden style="margin-top:18px">
+      <div class="lbl" data-t="ask"></div>
       <textarea id="aq" rows="2"></textarea>
       <button class="fire" id="ab" data-t="askBtn"></button>
       <div class="ans" id="aa" aria-live="polite"></div>
     </div>
-  </section>
-</div></section>
-</div>
+  </div>
+  <div id="p-solo" hidden>
+    <div class="row" style="justify-content:space-between;margin-bottom:10px">
+      <div class="seg" id="mode"><button data-m="pent"></button><button data-m="scale"></button><button data-m="chord"></button></div>
+      <div class="seg" id="lab"><button data-l="name"></button><button data-l="deg"></button></div>
+    </div>
+    <div class="fbwrap"><div class="fb" id="fb1"><svg></svg></div></div>
+    <p class="cap" id="fbc"></p>
+  </div>
+</section>
 
-<div id="vLes" hidden>
-<section class="band les"><div class="in">
-  <div class="ll" id="ll"></div>
-  <div class="lesson" id="lesson"></div>
-</div></section>
-</div>
+<section id="v-five" hidden><div id="fiveC"></div></section>
 
+<section id="v-lessons" hidden>
+  <h1 class="vt" data-t="tLes"></h1>
+  <p class="muted" id="lesSong"></p>
+  <div class="les"><div class="ll" id="ll"></div><div class="lesson" id="lesson"></div></div>
+</section>
+
+<section id="v-tuner" hidden>
+  <h1 class="vt" data-t="tTune"></h1>
+  <div class="tun">
+    <div class="dial">
+      <svg viewBox="0 0 300 170" aria-hidden="true">
+        <path d="M30 150 A120 120 0 0 1 270 150" fill="none" stroke="#ffffff30" stroke-width="16" stroke-linecap="round"/>
+        <path d="M137.5 30.6 A120 120 0 0 1 162.5 30.6" fill="none" stroke="#5cc493" stroke-width="16"/>
+        <g id="ticks"></g>
+        <g id="needle"><line x1="150" y1="150" x2="150" y2="38" stroke="#ff5a1f" stroke-width="5" stroke-linecap="round"/><circle cx="150" cy="150" r="10" fill="#ff5a1f"/></g>
+        <text x="30" y="168" fill="#cfe3d7" font-size="14" text-anchor="middle">−50</text><text x="270" y="168" fill="#cfe3d7" font-size="14" text-anchor="middle">+50</text>
+      </svg>
+      <div class="tnote" id="tnote">–</div>
+      <div class="thint" id="thint"></div>
+      <div class="strs" id="strs"></div>
+      <div class="row" style="justify-content:center;margin-top:16px"><button class="fire" data-mic></button></div>
+      <p class="t micmsg" style="color:#cfe3d7;margin-top:8px"></p>
+    </div>
+    <div class="panel">
+      <label for="tuning" data-t="tuningL"></label>
+      <select id="tuning"></select>
+      <p class="t" data-t="playStr" style="margin-top:12px"></p>
+      <label class="sw"><input type="checkbox" id="tauto" checked> <span data-t="auto"></span></label>
+      <label class="sw"><input type="checkbox" id="tref" checked> <span data-t="refTone"></span></label>
+    </div>
+  </div>
+</section>
+
+<section id="v-more" hidden>
+  <h1 class="vt" data-t="tMore"></h1>
+  <div class="more">
+    <div class="panel met">
+      <div class="lbl" data-t="metro"></div>
+      <div class="big"><span id="bpm">80</span> <small>BPM</small></div>
+      <div class="dots" id="dots"></div>
+      <input type="range" id="br" min="40" max="220" value="80" aria-label="BPM">
+      <div class="row"><button class="sq" id="bm" aria-label="-">−</button><button class="pri" id="go"></button><button id="tap" data-t="tap"></button><button class="sq" id="bp" aria-label="+">+</button></div>
+      <div class="row" style="margin-top:10px;justify-content:center"><span class="muted" data-t="beats"></span><div class="seg" id="bt"><button data-b="2">2</button><button data-b="3">3</button><button data-b="4">4</button><button data-b="6">6</button></div></div>
+    </div>
+    <div class="panel set">
+      <div><div class="lbl" data-t="langL"></div><div class="seg" id="lang"><button data-l="cs">Čeština</button><button data-l="en">English</button></div></div>
+      <div><div class="lbl" data-t="notL"></div><div class="seg" id="notn"><button data-n="h"></button><button data-n="b"></button></div></div>
+      <div><div class="lbl" data-t="plL"></div><div class="seg" id="plvls"></div></div>
+      <div><div class="lbl" data-t="lvlL"></div><div class="seg" id="lvls"></div></div>
+      <label class="sw"><input type="checkbox" id="lefty"> <span data-t="leftyL"></span></label>
+    </div>
+    <div class="panel">
+      <div class="lbl" data-t="bkL"></div>
+      <p class="t" data-t="bkHint"></p>
+      <textarea id="bkTx" spellcheck="false"></textarea>
+      <div class="row"><button id="bkCopy" data-t="bkCopyB"></button><button id="bkLoad" data-t="bkLoadB"></button></div>
+      <p class="t" id="bkMsg" style="margin-top:8px"></p>
+    </div>
+    <div class="panel">
+      <button id="reset" data-t="reset"></button>
+      <div id="resetQ" hidden style="margin-top:10px"><p class="t" data-t="resetQ"></p><div class="row" style="margin-top:8px"><button class="fire" id="resetY" data-t="yes"></button><button id="resetN" data-t="no"></button></div></div>
+    </div>
+  </div>
+</section>
+</main>
+
+<div class="ov" id="songOv" hidden><div class="box" role="dialog" aria-modal="true">
+  <div id="sList">
+    <div class="row" style="justify-content:space-between"><h2 data-t="songs"></h2><button id="sClose" data-t="close"></button></div>
+    <button class="fire" id="sAdd" data-t="addSong" style="margin:10px 0 12px"></button>
+    <input type="text" id="sq" autocomplete="off">
+    <div class="row" style="margin:8px 0 4px"><span class="muted" data-t="sortL"></span><div class="seg" id="ssort"></div></div>
+    <div class="lbl" style="margin-top:12px" data-t="mineL"></div><div class="slist" id="slMine"></div>
+    <div class="lbl" style="margin-top:14px" data-t="examples"></div><div class="slist" id="slEx"></div>
+  </div>
+  <div id="sEdit" hidden>
+    <h2 id="sEditT"></h2>
+    <label for="nm" data-t="song" style="margin-top:10px"></label>
+    <input type="text" id="nm" autocomplete="off" style="margin-bottom:12px">
+    <a id="find" class="find" href="https://www.google.com/search?q=akordy" target="_blank" rel="noopener" data-t="find"></a>
+    <div class="row" style="justify-content:space-between;align-items:flex-end"><label for="tx" data-t="chordsLbl" style="flex:1"></label><button id="sPaste" data-t="paste" style="margin-bottom:6px"></button></div>
+    <textarea id="tx" spellcheck="false" wrap="off"></textarea>
+    <div class="det" id="det"></div>
+    <div class="row"><button class="pri" id="sSave" data-t="save"></button><button id="sBack" data-t="back"></button><button id="sDel" data-t="del"></button></div>
+    <div id="sDelQ" hidden class="confirm"><p data-t="delQ"></p><div class="row"><button class="fire" id="sDelY" data-t="delY"></button><button id="sDelN" data-t="delN"></button></div></div>
+  </div>
+</div></div>
+
+<div class="ov" id="chOv" hidden><div class="box" role="dialog" aria-modal="true">
+  <div class="row" style="justify-content:space-between"><h2 id="chT"></h2><button id="chClose" data-t="close"></button></div>
+  <div class="chgrid" id="chB"></div>
+  <p class="t" id="chTip"></p>
+</div></div>
+
+<div class="ov" id="impOv" hidden><div class="box" role="dialog" aria-modal="true">
+  <div class="lbl" data-t="importT"></div><h2 id="impN"></h2><div class="sheetv imp" id="impTx"></div>
+  <div class="row" style="margin-top:14px"><button class="fire" id="impY" data-t="importAdd"></button><button id="impN2" data-t="importNo"></button></div>
+</div></div>
+<div class="campbar" id="campBar" hidden><button class="sq" id="cfm">A−</button><button class="sq" id="cfp">A+</button><button class="pri" id="cScr"></button><button class="sq" id="csm" aria-label="slower">🐢</button><button class="sq" id="csp" aria-label="faster">🐇</button><button id="cExit" data-t="campExit"></button></div>
+<div class="toast" id="toast" hidden role="status"><span id="toastT"></span><button id="toastB"></button></div>
 <div class="sheet" id="sheet" hidden role="dialog"><h3 id="shT"></h3><p id="shX"></p><div class="row"><button class="fire" id="shA" hidden></button><button id="shC"></button></div></div>
 <div class="ov" id="ov" hidden><div class="box" role="dialog" aria-modal="true">
   <div class="row" style="justify-content:flex-end"><div class="seg" id="lang2"><button data-l="cs">CZ</button><button data-l="en">EN</button></div></div>
   <h2 data-t="lvlT"></h2><p class="muted" data-t="lvlN"></p>
-  <div class="lv" id="lv"></div>
+  <div class="lbl obq" data-t="playQ"></div><div class="lv" id="lvP"></div>
+  <div class="lbl obq" data-t="theoryQ"></div><div class="lv" id="lv"></div>
+  <button class="fire big1" id="obDone" data-t="okGo"></button>
 </div></div>
 
-<script>
-{
-const $=id=>document.getElementById(id);
-const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const store={get(k,d){try{const v=localStorage.getItem(k);return v==null?d:JSON.parse(v)}catch(e){return d}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}};
-
-let lang=store.get('pcz-lang',/^(cs|sk)/i.test(navigator.language||'cs')?'cs':'en');
-let cz=store.get('pcz-cz',lang==='cs'),level=store.get('pcz-level',null),mine=store.get('pcz-songs',[]),done=store.get('pcz-done',[]);
-let cur='x1',shift=0,selIdx=0,mode='pent',lab='name',view='song',les=0,sample=null,sheetTerm=null;
-const tr=(c,e)=>lang==='cs'?c:e;
-
-const S={cs:{sub:'Nauka na písničkách, které už hraješ.',note:'Ukázky obsahují jen hlavní postup akordů. Svoje písničky si vlož a ulož, zůstanou v tomhle prohlížeči.',tabSong:'Písnička',tabLes:'Lekce',song:'Písnička',find:'Najít akordy k písničce na internetu ↗',chordsLbl:'Akordy, nebo vlož celou písničku i s textem',ph:'Např.:\nG D Em C\nnebo zkopíruj písničku ze zpěvníku',save:'Uložit',newS:'Nová',del:'Smazat',saved:'Uloženo do tvých písniček.',noDel:'Ukázky smazat nejdou, jen tvoje písničky.',transp:'Transpozice',back:'Zpět',notation:'Česká notace (H a B)',
- homeL:'Domov písničky',keyL:'Tónina',minor:'moll',major:'dur',moodMin:'Moll: smutnější, tmavší nálada',moodMaj:'Dur: veselejší, světlejší nálada',rel:x=>`Paralelní ${x}, stejné tóny`,patL:'Poznávám postup',listen:'▶ Poslechni',stopP:'■ Stop',techn:'Odborně',playAll:'▶ Zahraj akordy písničky',empty:'Zatím tu nejsou žádné akordy. Napiš třeba G D Em C, nebo vlož písničku ze zpěvníku.',tones:'Tóny akordu',capoL:'Kapodastr: nejsnazší tvary',capoAt:k=>`Kapo na ${k}. pražci`,noCapo:'Bez kapodastru',
- fbPent:'Hmatník: kde hrát sólo',fbScale:'Hmatník: celá stupnice',fbChord:'Hmatník: tóny akordu',mPent:'Pentatonika',mScale:'Celá stupnice',mChord:'Tóny akordu',lName:'Názvy',lDeg:'Stupně',
- capPent:(k,n,m,f,maj)=>`<b>${k}</b> pentatonika: ${n}. Box 1 začíná tónem ${m} na basové E struně, na ${f}. pražci.`+(maj?` Je to box paralelní ${m} moll, tóny jsou stejné.`:''),capScale:(k,n)=>`<b>${k}</b> stupnice: ${n}. Oranžová je domov, na něm sólo nejlíp skončí.`,capChord:(c,n)=>`<b>${c}</b>: tóny ${n}. Ty samé tóny najdeš všude, kde svítí, i mimo akordový tvar.`,capEmpty:'Vyber písničku a uvidíš, kde na hmatníku bydlí.',
- metro:'Metronom',start:'Spustit',stopM:'Zastavit',tap:'Ťukni tempo',beats:'Dob v taktu',why:'Proč to tak je?',whySub:'Ťukni na otázku. Odpovědi vychází z tvé písničky a fungují i bez internetu.',ask:'Vlastní otázka (přes Clauda)',askPh:'Např.: Proč je tu akord A, když je písnička v D moll?',askBtn:'Zeptat se',asking:'Přemýšlím…',askErr:'Teď se nepodařilo odpovědět. Zkus to za chvíli.',askMore:'Zeptej se víc',close:'Zavřít',
- lvlT:'Jak jsi na tom s naukou?',lvlN:'Podle toho ti budu vysvětlovat. Změníš to kdykoli nahoře.',lv:{beg:['Začátečník','Hraju akordy, nauku neznám.'],mid:['Mírně pokročilý','Vím, co je dur a moll.'],adv:['Pokročilý','Znám stupně a stupnice.']},lvlBtn:'Úroveň',
- lesOf:(i,n)=>`Lekce ${i} z ${n}`,prev:'← Předchozí',next:'Další lekce →',right:'Správně!',wrong:'Ještě jednou. Zkus si to poslechnout.',
- sug:(n,min,x)=>[`Proč písnička ${n} zní ${min?'smutně':'vesele'}?`,'Jak mám nad ní hrát sólo?',`Proč je tu akord ${x}?`]},
-en:{sub:'Music theory through songs you already play.',note:'Examples contain only the main chord progression. Paste and save your own songs, they stay in this browser.',tabSong:'Song',tabLes:'Lessons',song:'Song',find:'Find chords for this song online ↗',chordsLbl:'Chords, or paste the whole song with lyrics',ph:'E.g.:\nG D Em C\nor paste a song from a songbook site',save:'Save',newS:'New',del:'Delete',saved:'Saved to your songs.',noDel:'Examples can’t be deleted, only your songs.',transp:'Transpose',back:'Reset',notation:'German/Czech notation (H)',
- homeL:'Home of the song',keyL:'Key',minor:'minor',major:'major',moodMin:'Minor: sadder, darker mood',moodMaj:'Major: happier, brighter mood',rel:x=>`Relative ${x}, same notes`,patL:'Progression spotted',listen:'▶ Listen',stopP:'■ Stop',techn:'Theory name',playAll:'▶ Play the song’s chords',empty:'No chords yet. Type e.g. G D Em C, or paste a song.',tones:'Chord notes',capoL:'Capo: easiest shapes',capoAt:k=>`Capo on fret ${k}`,noCapo:'No capo',
- fbPent:'Fretboard: where to solo',fbScale:'Fretboard: full scale',fbChord:'Fretboard: chord notes',mPent:'Pentatonic',mScale:'Full scale',mChord:'Chord notes',lName:'Names',lDeg:'Degrees',
- capPent:(k,n,m,f,maj)=>`<b>${k}</b> pentatonic: ${n}. Box 1 starts on ${m} on the low E string, fret ${f}.`+(maj?` It’s the box of the relative ${m} minor, same notes.`:''),capScale:(k,n)=>`<b>${k}</b> scale: ${n}. Orange is home, the best note to end a solo on.`,capChord:(c,n)=>`<b>${c}</b>: notes ${n}. The same notes light up all over the neck, not just in the chord shape.`,capEmpty:'Pick a song to see where it lives on the neck.',
- metro:'Metronome',start:'Start',stopM:'Stop',tap:'Tap tempo',beats:'Beats per bar',why:'Why is it like that?',whySub:'Tap a question. Answers come from your song and work offline.',ask:'Your own question (via Claude)',askPh:'E.g.: Why is there an A chord when the song is in D minor?',askBtn:'Ask',asking:'Thinking…',askErr:'Couldn’t answer right now. Try again in a moment.',askMore:'Ask more',close:'Close',
- lvlT:'How much theory do you know?',lvlN:'I’ll explain things at your level. Change it anytime at the top.',lv:{beg:['Beginner','I play chords, no theory.'],mid:['Intermediate','I know major and minor.'],adv:['Advanced','I know degrees and scales.']},lvlBtn:'Level',
- lesOf:(i,n)=>`Lesson ${i} of ${n}`,prev:'← Previous',next:'Next lesson →',right:'Correct!',wrong:'Not quite. Try listening again.',
- sug:(n,min,x)=>[`Why does ${n} sound ${min?'sad':'happy'}?`,'How should I solo over it?',`Why is the ${x} chord here?`]}};
-const X=()=>S[lang];
-
-const GL={tonina:[['Tónina','Skupina tónů, ze kterých je písnička postavená. Jmenuje se podle domova, tedy akordu, kde písnička odpočívá.'],['Key','The set of notes a song is built from. It’s named after home, the chord where the song rests.']],
- durmoll:[['Dur a moll','Dur zní vesele a světle, moll smutně a tmavě. Liší se jen jedním tónem uprostřed akordu.'],['Major and minor','Major sounds happy and bright, minor sad and dark. They differ by just one note in the middle of the chord.']],
- stupen:[['Čísla (stupně)','Akordy se číslují od domova: domov je I, další podle toho, jak daleko jsou. Velké číslo je dur, malé moll.'],['Numbers (degrees)','Chords are numbered from home: home is I, the rest by how far away they are. Uppercase is major, lowercase minor.']],
- postup:[['Postup','Pořadí akordů, které se v písničce opakuje. Stejné postupy najdeš v desítkách písniček.'],['Progression','The order of chords that repeats in a song. The same progressions show up in dozens of songs.']],
- pent:[['Pentatonika','Pět tónů z tóniny, které skoro nikdy nezní špatně. Ideální na první sóla.'],['Pentatonic','Five notes from the key that almost never sound wrong. Perfect for first solos.']],
- kapo:[['Kapodastr','Svorka na krk kytary. Hraješ stejné tvary, ale zní výš.'],['Capo','A clamp on the neck. You play the same shapes, they sound higher.']]};
-
-const EXAMPLES=[{id:'x1',name:'Sultans of Swing',text:'Dm C Bb A\nDm C Bb A\nF C Bb Dm'},{id:'x2',name:'Hit the Road Jack',text:'Am G F E'},{id:'x3',name:'Let It Be',text:'C G Am F\nC G F C'},{id:'x4',name:"Knockin' on Heaven's Door",text:'G D Am\nG D C'},{id:'x5',name:'Stand by Me',text:'A F#m D E A'}];
-
-const INT_S=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'],INT_F=['C','Db','D','Eb','E','F','Gb','G','Ab','A','Bb','B'],CZ_S=['C','C#','D','D#','E','F','F#','G','G#','A','B','H'],CZ_F=['C','Db','D','Eb','E','F','Gb','G','Ab','A','B','H'];
-let flat=false;
-const nn=pc=>(cz?(flat?CZ_F:CZ_S):(flat?INT_F:INT_S))[((pc%12)+12)%12];
-const BASE={C:0,D:2,E:4,F:5,G:7,A:9,B:11,H:11};
-const RE=/^([A-H])(#|is|es|b|s)?(maj7|maj9|maj|mi|min|moll|m|dim|°|aug|\+)?((?:add9|add11|add2|sus2|sus4|sus|maj7|7|9|11|13|6|5|4|2)*)(?:\/([A-H])(#|is|es|b)?)?$/;
-function rootOf(l,a){let v=BASE[l];if(cz&&l==='B')return 10;if(a==='#'||a==='is')v++;if(a==='b'||a==='es'||a==='s')v--;return (v+12)%12}
-function chord(tok){
- const t=tok.replace(/^[\[({]+|[\])},.;:!?]+$/g,'');const m=RE.exec(t);if(!m)return null;
- if(m[2]==='s'&&m[1]!=='A'&&m[1]!=='E')return null;
- let q='M',ext=m[4]||'',qq=m[3]||'';
- if(qq.startsWith('maj'))ext=qq+ext;else if(/^(m|mi|min|moll)$/.test(qq))q='m';else if(qq==='dim'||qq==='°')q='d';else if(qq==='aug'||qq==='+')q='a';
- if(q==='M'&&/sus/.test(ext))q='s';if(q==='M'&&ext==='5')q='5';
- return {root:rootOf(m[1],m[2]),q,ext,bass:m[5]?rootOf(m[5],m[6]):null};
-}
-const JUNK=/^([|\-–—\/:.*x×\d()]+|R\d?:?|Ref\.?:?|Rec\.?:?|Refrén:?|Chorus:?|Verse:?|Sloka:?|Intro:?|Outro:?|Mezihra:?|Bridge:?|Solo:?)$/i;
-function parse(text){
- const out=[];
- for(const line of text.split(/\r?\n/)){
-  const br=[...line.matchAll(/\[([^\]]+)\]/g)].map(x=>chord(x[1])).filter(Boolean);
-  if(br.length){out.push(...br);continue}
-  const toks=line.split(/\s+/).filter(t=>t&&!JUNK.test(t));if(!toks.length)continue;
-  const cs=toks.map(chord),n=cs.filter(Boolean).length;
-  if(n/toks.length>=0.6)out.push(...cs.filter(Boolean));
- }
- return out;
-}
-const qm=(c,w)=>c.q===w?1:((c.q==='s'||c.q==='5')&&w!=='d'?0.8:0);
-const T={maj:{0:[['M',1]],2:[['m',1],['M',.4]],4:[['m',1],['M',.4]],5:[['M',1],['m',.4]],7:[['M',1]],9:[['m',1]],10:[['M',.5]],11:[['d',1]]},
- min:{0:[['m',1]],2:[['d',1]],3:[['M',1]],5:[['m',1],['M',.3]],7:[['M',1],['m',1]],8:[['M',1]],10:[['M',1]]}};
-function detect(cs){
- if(!cs.length)return null;let best=null;
- for(let t=0;t<12;t++)for(const md of ['maj','min']){
-  let s=0;for(const c of cs){const L=T[md][(c.root-t+12)%12];if(L)s+=Math.max(...L.map(([w,v])=>v*qm(c,w)))}
-  const tq=md==='maj'?'M':'m',f=cs[0],l=cs[cs.length-1];
-  if(f.root===t&&qm(f,tq))s+=1.5;if(l.root===t&&qm(l,tq))s+=1.2;
-  if(!best||s>best.s+1e-9)best={t,minor:md==='min',s};
- }
- return best;
-}
-const NUM_MAJ=['I','bII','II','bIII','III','IV','#IV','V','bVI','VI','bVII','VII'],NUM_MIN=['I','bII','II','III','#III','IV','#IV','V','VI','#VI','VII','#VII'];
-const ROLE={cs:{maj:{'0M':['Domov','Tónika','Domov. Tady je klid, tady písnička začíná i končí.'],'0m':['Stín domova','Vypůjčený akord','Mollový domov. Na chvilku se zatáhne.'],'2m':['Příprava','Subdominantní ii','Chystá cestu k napětí. Klasika: ii → V → I.'],'2M':['Odbočka','Dominanta k V','Vypůjčený durový. Táhne k napětí (V) ještě silněji.'],'4m':['Most','Medianta','Měkký přechod, má dva tóny společné s domovem.'],'4M':['Zvrat','Dominanta k vi','Vypůjčený. Táhne k smutnému bratrovi (vi), zní jako nečekaný zvrat.'],'5M':['Výlet','Subdominanta','Výlet z domova. Mírné napětí, žádný stres.'],'5m':['Smutný výlet','Vypůjčená subdominanta','Smutná chvilka těsně před návratem domů.'],'7M':['Napětí','Dominanta','Největší napětí. Ucho chce po něm domů.'],'7m':['Slabé napětí','Mollová dominanta','Táhne domů jen slabě.'],'9m':['Smutný bratr','Paralelní moll','Smutný bratr domova. Skoro stejné tóny, jiná nálada.'],'10M':['Rockový host','Vypůjčený bVII','Akord vypůjčený z moll. Zní drsněji a otevřeněji.'],'11d':['Napětí','Zmenšený vii°','Táhne domů jako napětí (V), u táboráku vzácný.']},
- min:{'0m':['Domov','Tónika','Domov, ale smutný. Tady se písnička usadí.'],'0M':['Světlý konec','Pikardská tercie','Durový domov v mollové písni. Světlo na konci.'],'3M':['Světlo','Paralelní dur','Na chvíli prosvitne světlo.'],'5m':['Výlet','Subdominanta','Odchod z domova, ještě melancholičtější.'],'5M':['Světlý výlet','Dorská subdominanta','Nečekaně světlý akord v moll.'],'7M':['Napětí','Dominanta z harmonické moll','Silný, dramatický tah domů. Je vypůjčený, proto zní tak výrazně.'],'7m':['Slabé napětí','Mollová dominanta','Slabý tah domů, folkový zvuk.'],'8M':['Velký prostor','Submedianta VI','Epický, filmový akord.'],'10M':['Schod','Subtonika VII','Schod pod domovem. Odtud dolů, nebo nahoru domů.'],'2d':['Napětí','Zmenšený ii°','Napjatý, chystá napětí (V).']},
- def:['Host','Mimo tóninu','Akord mimo tóninu. Vypůjčený, proto zní překvapivě.'],sev:' Sedmička přidá ještě víc tahu.'},
-en:{maj:{'0M':['Home','Tonic','Home. Calm; songs usually start and end here.'],'0m':['Shadow of home','Borrowed chord','Minor version of home. Clouds roll in for a moment.'],'2m':['Setup','Supertonic ii','Prepares the tension. Classic: ii → V → I.'],'2M':['Detour','Secondary dominant (V of V)','Borrowed major chord. Pulls toward the tension (V) even harder.'],'4m':['Bridge','Mediant iii','Soft transition, shares two notes with home.'],'4M':['Twist','Secondary dominant (V of vi)','Borrowed. Pulls toward the sad sibling (vi), like a plot twist.'],'5M':['Trip','Subdominant','A trip away from home. Mild tension, no stress.'],'5m':['Sad trip','Borrowed subdominant iv','A sad moment right before coming home.'],'7M':['Tension','Dominant','The most tension. Your ear wants to go home after it.'],'7m':['Weak tension','Minor dominant','Pulls home only gently.'],'9m':['Sad sibling','Relative minor','Home’s sad sibling. Almost the same notes, different mood.'],'10M':['Rock guest','Borrowed bVII','Borrowed from minor. Sounds rougher and more open.'],'11d':['Tension','Diminished vii°','Pulls home like V, rare at campfires.']},
- min:{'0m':['Home','Tonic','Home, but sad. The song settles here.'],'0M':['Bright ending','Picardy third','Major home in a minor song. Light at the end.'],'3M':['Light','Relative major','Light shines through for a moment.'],'5m':['Trip','Subdominant','Leaving home, even more melancholic.'],'5M':['Bright trip','Dorian IV','Surprisingly bright chord in minor.'],'7M':['Tension','Dominant from harmonic minor','Strong, dramatic pull home. It’s borrowed, that’s why it stands out.'],'7m':['Weak tension','Minor dominant','Weak pull home, folky sound.'],'8M':['Big space','Submediant VI','Epic, cinematic chord.'],'10M':['Step','Subtonic VII','A step below home. Go down from here, or up home.'],'2d':['Tension','Diminished ii°','Tense, prepares V.']},
- def:['Guest','Out of key','Not from this key. Borrowed, that’s why it surprises.'],sev:' The 7 adds even more pull.'}};
-function role(c,k){
- const iv=(c.root-k.t+12)%12,bq=c.q==='s'||c.q==='5'||c.q==='a'?'M':c.q;
- let num=(k.minor?NUM_MIN:NUM_MAJ)[iv];num=(bq==='m'||bq==='d')?num.toLowerCase():num;if(bq==='d')num+='°';
- const R=ROLE[lang],r=R[k.minor?'min':'maj'][iv+bq]||R.def;let tip=r[2];
- if(iv===7&&/7/.test(c.ext)&&!/maj7/.test(c.ext))tip+=R.sev;
- return {id:iv+bq,iv,bq,num,word:r[0],term:r[1],tip,home:iv===0};
-}
-const PAT={maj:[['I–V–vi–IV',['0M','7M','9m','5M'],['Čtyři akordy hitů','The four-chord hit'],['Axis progrese','Axis progression'],['Na tomhle pořadí stojí stovky hitů. Když ho poznáš, zahraješ je všechny.','Hundreds of hits use this exact order. Learn it once, play them all.']],
- ['I–vi–IV–V',['0M','9m','5M','7M'],['Balada z padesátek','The 50s ballad'],['Doo-wop progrese','Doo-wop progression'],['Domov, smutek, výlet, napětí a zpátky domů.','Home, sadness, a trip, tension and back home.']],
- ['vi–IV–I–V',['9m','5M','0M','7M'],['Smutné čtyři akordy','The sad four chords'],['Axis progrese od vi','Axis progression from vi'],['Stejné akordy jako hity, jen začínají smutným bratrem.','Same chords as the hits, just starting on the sad sibling.']],
- ['ii–V–I',['2m','7M','0M'],['Nejhladší cesta domů','The smoothest way home'],['Kadence ii–V–I','ii–V–I cadence'],['Příprava, napětí, domov. Nejhladší návrat, jaký existuje.','Setup, tension, home. The smoothest return there is.']],
- ['I–IV–V',['0M','5M','7M'],['Tři akordy rokenrolu','Three-chord rock'],['Hlavní kadence T–S–D','Primary chords I–IV–V'],['Domov, výlet, napětí. Základ blues, country i trampských písní.','Home, trip, tension. The base of blues, country and folk.']]],
- min:[['i–VII–VI–V',['0m','10M','8M','7M'],['Schody dolů','Walking down the stairs'],['Andaluská kadence','Andalusian cadence'],['Akordy jdou po schodech dolů a poslední tě silně táhne zpátky domů. Proto to tak táhne.','The chords walk down step by step and the last one pulls you hard back home. That’s why it grips you.']],
- ['i–VI–III–VII',['0m','8M','3M','10M'],['Epický kruh','The epic loop'],['Mollová axis progrese','Minor axis progression'],['Ty samé čtyři akordy jako hity, jen začínají z moll.','The same four chords as the hits, starting from minor.']],
- ['i–iv–V',['0m','5m','7M'],['Mollová cesta domů','The minor road home'],['Mollová kadence','Minor cadence'],['Výlet, napětí, domov. Nejsilnější návrat v moll.','Trip, tension, home. The strongest return in minor.']],
- ['i–VII–VI',['0m','10M','8M'],['Schody dolů','Walking down the stairs'],['Sestupný bas','Descending bass'],['Basa jde krok za krokem dolů. Jednoduché a hrozně účinné.','The bass walks down step by step. Simple and very effective.']]]};
-function pattern(cs,k){
- const seq=[];for(const c of cs){const id=role(c,k).id;if(!seq.length||seq[seq.length-1].id!==id)seq.push({id,c})}
- if(seq.length>1&&seq[0].id===seq[seq.length-1].id)seq.pop();
- const s2=seq.concat(seq);const li=lang==='cs'?0:1;
- for(const p of PAT[k.minor?'min':'maj'])for(let i=0;i<seq.length;i++){if(p[1].every((id,j)=>s2[i+j]&&s2[i+j].id===id))return {num:p[0],name:p[2][li],term:p[3][li],tip:p[4][li],chords:s2.slice(i,i+p[1].length).map(x=>x.c)}}
- return null;
-}
-const EASY={'0M':1,'2M':1,'4M':1,'7M':1,'9M':1,'9m':1,'4m':1,'2m':1,'5M':.5,'11m':.4,'11M':.35};
-function capos(us){const r=[];for(let k=0;k<=9;k++){let s=0;for(const c of us){const bq=c.q==='m'?'m':(c.q==='d'?'d':'M');s+=EASY[((c.root-k+12)%12)+bq]||0}r.push({k,s:s/us.length-k*.012})}return r.sort((a,b)=>b.s-a.s).slice(0,3)}
-const QS={M:'',m:'m',d:'dim',a:'+',s:'','5':''};
-const cname=(c,d=0)=>nn(c.root-d)+QS[c.q]+c.ext+(c.bass!=null?'/'+nn(c.bass-d):'');
-function tones(c){const t=[0];if(c.q==='m'||c.q==='d')t.push(3);else if(c.q==='M'||c.q==='a')t.push(4);else if(c.q==='s')t.push(/sus2/.test(c.ext)?2:5);t.push(c.q==='d'?6:c.q==='a'?8:7);if(/maj7/.test(c.ext))t.push(11);else if(/7/.test(c.ext))t.push(c.q==='d'?9:10);return t}
-const DEG=['1','b2','2','b3','3','4','b5','5','b6','6','b7','7'];
-const keyName=k=>nn(k.t)+' '+(k.minor?X().minor:X().major);
-let A={cs:[],us:[],k:null};
-
-/* ---------- sound ---------- */
-let ac=null,master=null,playT=[];const bufs={};
-function actx(){if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)();ac.resume();return ac}
-function pluckBuf(m){if(bufs[m])return bufs[m];const f=440*2**((m-69)/12),sr=ac.sampleRate,len=Math.floor(sr*1.8),N=Math.max(2,Math.round(sr/f)),b=ac.createBuffer(1,len,sr),d=b.getChannelData(0);
- let p=0;for(let i=0;i<N;i++){const r=Math.random()*2-1;d[i]=(r+p)*.5;p=r}for(let i=N;i<len;i++)d[i]=.4985*(d[i-N]+d[i-N+1]);return bufs[m]=b}
-function note(m,t,g){const s=ac.createBufferSource(),v=ac.createGain();s.buffer=pluckBuf(m);v.gain.value=g;s.connect(v).connect(master);s.start(t)}
-function voicing(c){const b=40+(((c.bass??c.root)-4+12)%12),ms=[b];for(const t of tones(c)){ms.push(52+((c.root+t-4+12)%12))}ms.push(64+((c.root-4+12)%12));return [...new Set(ms)].sort((a,b)=>a-b)}
-function stopPlay(){playT.forEach(clearTimeout);playT=[];if(master){try{master.disconnect()}catch(e){}master=null}document.querySelectorAll('.lit').forEach(e=>e.classList.remove('lit'));document.querySelectorAll('[data-pl].playing').forEach(b=>{b.classList.remove('playing');b.textContent=b.dataset.lbl})}
-function play(items,btn,step=1.15,notes=false){
- const was=btn&&btn.classList.contains('playing');stopPlay();if(was)return;
- try{actx()}catch(e){return}master=ac.createGain();master.gain.value=.7;master.connect(ac.destination);
- const t0=ac.currentTime+.06;
- items.forEach((it,i)=>{const t=t0+i*step;
-  if(notes)note(it,t,.5);else voicing(it).forEach((m,j)=>note(m,t+j*.022,.22));
-  playT.push(setTimeout(()=>{document.querySelectorAll('.lit').forEach(e=>e.classList.remove('lit'));if(!notes){const n=cname(it);document.querySelectorAll(`[data-cn="${CSS.escape(n)}"]`).forEach(e=>e.classList.add('lit'))}},(t-ac.currentTime)*1000))});
- if(btn){btn.dataset.lbl=btn.dataset.lbl||btn.textContent;btn.classList.add('playing');btn.textContent=X().stopP}
- playT.push(setTimeout(()=>{if(btn){btn.classList.remove('playing');btn.textContent=btn.dataset.lbl}document.querySelectorAll('.lit').forEach(e=>e.classList.remove('lit'))},(t0-ac.currentTime+items.length*step+.4)*1000));
-}
-const reg={};let regN=0;
-const pbtn=(lbl,items,o={})=>{const id='p'+(regN++);reg[id]={items,...o};return `<button class="${o.cls||''}" data-pl="${id}" data-lbl="${esc(lbl)}">${esc(lbl)}</button>`};
-document.addEventListener('click',e=>{const b=e.target.closest('[data-pl]');if(!b)return;const r=reg[b.dataset.pl];if(!r)return;if(r.act)return r.act();play(r.items,b,r.step||1.15,r.notes)});
-
-/* ---------- songs + analysis ---------- */
-function songs(){return EXAMPLES.concat(mine)}
-function chips(){$('chips').innerHTML=songs().map(s=>`<button class="chip${s.id===cur?' on':''}" data-id="${esc(s.id)}">${esc(s.name||'—')}</button>`).join('')+(view==='song'?`<button class="chip add" data-id="">+ ${esc(X().newS)}</button>`:'')}
-function upd(){$('find').href='https://www.google.com/search?q='+encodeURIComponent(($('nm').value.trim()+tr(' akordy',' chords')).trim())}
-function load(id){const s=songs().find(x=>x.id===id);cur=id;shift=0;selIdx=0;$('nm').value=s?s.name:'';$('tx').value=s?s.text:'';$('msg').textContent='';upd();update()}
-const gq=t=>`<button class="q" data-g="${t}" aria-label="?">?</button>`;
-const seq=()=>{const o=[];for(const c of A.cs)if(!o.length||cname(o[o.length-1])!==cname(c))o.push(c);return o.slice(0,16)};
-
-function update(){
- const cs=parse($('tx').value).map(c=>({...c,root:(c.root+shift+12)%12,bass:c.bass==null?null:(c.bass+shift+12)%12}));
- const k=detect(cs);flat=false;if(k){const me=k.minor?(k.t+3)%12:k.t;flat=[5,10,3,8,1].includes(me)}
- const seen=new Map();for(const c of cs){const n=cname(c);if(!seen.has(n))seen.set(n,{...c})}
- const us=[...seen.values()];if(selIdx>=us.length)selIdx=0;A={cs,us,k};
- $('to').textContent=(shift>0?'+':'')+shift;chips();renderAna();draw();renderAsk();if(view==='les')renderLes();
-}
-function renderAna(){
- stopPlay();regN=0;const {cs,us,k}=A,el=$('ana'),x=X();
- if(!k){el.innerHTML=`<div class="lbl">${x.keyL}</div><div class="key">–</div><p class="empty">${x.empty}</p>`;return}
- const p=pattern(cs,k),c=us[selIdx],r=role(c,k),beg=level==='beg';
- const keyBlock=beg?`<div><div class="lbl">${x.homeL} ${gq('tonina')}</div><div class="key"><b>${esc(nn(k.t)+(k.minor?'m':''))}</b></div><div class="muted">${k.minor?x.moodMin:x.moodMaj} ${gq('durmoll')}</div></div>`
-  :`<div><div class="lbl">${x.keyL} ${gq('tonina')}</div><div class="key"><b>${nn(k.t)}</b> ${k.minor?x.minor:x.major}</div><div class="muted">${x.rel(k.minor?nn(k.t+3)+' '+x.major:nn(k.t+9)+' '+x.minor)}</div></div>`;
- const card=(u,i)=>{const q=role(u,k);return `<button class="cd${q.home?' home':''}${i===selIdx?' on':''}" data-i="${i}" data-cn="${esc(cname(u))}">${beg?'':`<span class="num">${q.num}</span>`}<span class="cn">${esc(cname(u))}</span><span class="fn">${level==='adv'?q.term:q.word}</span></button>`};
- el.innerHTML=`<div class="keyrow">${keyBlock}${pbtn(x.playAll,seq(),{cls:'fire'})}</div>
- ${p?`<div class="pat"><div class="lbl">${x.patL} ${gq('postup')}</div><div class="big">${p.name}</div>
-  <div class="path">${p.chords.map(u=>{const q=role(u,k);return `<span class="pc${q.home?' home':''}" data-cn="${esc(cname(u))}"><b>${esc(cname(u))}</b><small>${q.word}</small></span>`}).join('<i>→</i>')}<i>↺</i></div>
-  <p>${p.tip}</p>${beg?'':`<p class="t">${x.techn}: ${p.term} (${p.num})</p>`}<div class="row" style="margin-top:8px">${pbtn(x.listen,p.chords.concat(p.chords),{})}</div></div>`:''}
- ${beg?'':`<div class="lbl" style="margin-top:22px">${tr('Čísla od domova','Numbers from home')} ${gq('stupen')}</div>`}
- <div class="cards" style="margin-top:${beg?22:0}px">${us.map(card).join('')}</div>
- <div class="sel"><div class="cn">${esc(cname(c))}</div><p><b>${beg?r.word:r.num+' · '+(level==='adv'?r.term:r.word)}.</b> ${r.tip}</p><p class="t">${x.tones}: ${tones(c).map(t=>nn(c.root+t)).join(' ')}</p>${pbtn('▶',[c],{cls:'sq'})}</div>
- <div class="capo"><div class="lbl">${x.capoL} ${gq('kapo')}</div><div class="caps">${capos(us).map(o=>{const f0=flat;flat=false;const sh=us.slice(0,6).map(u=>esc(cname(u,o.k))).join(' ');flat=f0;return `<div class="cp"><b>${o.k?x.capoAt(o.k):x.noCapo}</b><span>${sh}</span></div>`}).join('')}</div></div>`;
-}
-
-/* ---------- fretboard ---------- */
-const OPEN=[4,11,7,2,9,4],NF=15,fb=$('fb'),fs=$('fs');
-function draw(){
- const W=fb.clientWidth,H=fb.clientHeight;if(!W)return;
- const {k,us}=A,x=X();const L=62,R=14,top=26,bot=34,bh=H-top-bot,gap=bh/5,fw=(W-L-R)/NF;
- const fx=f=>L+f*fw,nx=f=>f===0?L/2:L+(f-.5)*fw,sy=i=>top+i*gap;
- let h=`<rect x="${L}" y="${top-14}" width="${W-L-R}" height="${bh+28}" rx="4" fill="var(--wood)"/>`,ref=null,set=[],cap='';
- if(k){
-  if(mode==='chord'){const c=us[selIdx];ref=c.root;set=tones(c);cap=x.capChord(esc(cname(c)),set.map(t=>nn(c.root+t)).join(' '))}
-  else{ref=k.t;set=mode==='pent'?(k.minor?[0,3,5,7,10]:[0,2,4,7,9]):(k.minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11]);
-   const mr=k.minor?k.t:(k.t+9)%12,f=(mr-4+12)%12,ns=set.map(t=>nn(k.t+t)).join(' ');
-   cap=mode==='pent'?x.capPent(keyName(k),ns,nn(mr),[f,f+12].filter(v=>v<=NF).join(tr('. a ',' and ')),!k.minor):x.capScale(keyName(k),ns);
-   if(mode==='pent')for(const b of [f,f+12].filter(v=>v>=1&&v+3<=NF))h+=`<rect x="${fx(b-1)}" y="${top-14}" width="${fw*4}" height="${bh+28}" fill="var(--fire)" opacity=".22"/>`}
- }
- for(let f=0;f<=NF;f++)h+=`<line x1="${fx(f)}" x2="${fx(f)}" y1="${top-14}" y2="${top+bh+14}" stroke="${f?'#b9b3a8':'#efe8da'}" stroke-width="${f?2:6}"/>`;
- for(const f of [3,5,7,9,15])h+=`<circle cx="${nx(f)}" cy="${top+bh/2}" r="6" fill="#d9cdb6" opacity=".55"/>`;
- h+=`<circle cx="${nx(12)}" cy="${sy(1)+gap/2}" r="6" fill="#d9cdb6" opacity=".55"/><circle cx="${nx(12)}" cy="${sy(3)+gap/2}" r="6" fill="#d9cdb6" opacity=".55"/>`;
- OPEN.forEach((o,i)=>{h+=`<line x1="${L-6}" x2="${W-R}" y1="${sy(i)}" y2="${sy(i)}" stroke="#e7dfcf" stroke-width="${1+i*.45}"/><text x="2" y="${sy(i)+5}" font-size="13" fill="var(--mut)" font-weight="600">${nn(o)}</text>`});
- const rr=Math.min(14,fw*.36,gap*.42);
- if(ref!=null)OPEN.forEach((o,i)=>{for(let f=0;f<=NF;f++){const pc=(o+f)%12,rel=(pc-ref+12)%12;if(!set.includes(rel))continue;const home=rel===0,cx=f===0?L-20:nx(f);
-  h+=`<circle cx="${cx}" cy="${sy(i)}" r="${rr}" fill="${home?'var(--fire)':'var(--pearl)'}" stroke="#00000033"/><text x="${cx}" y="${sy(i)+4.5}" text-anchor="middle" font-size="13" font-weight="700" fill="${home?'#fff':'#3a2318'}">${lab==='deg'?DEG[rel]:nn(pc)}</text>`}});
- for(let f=1;f<=NF;f++)h+=`<text x="${nx(f)}" y="${H-10}" text-anchor="middle" font-size="13" fill="var(--mut)" font-weight="${[3,5,7,9,12,15].includes(f)?700:400}">${f}</text>`;
- fs.innerHTML=h;$('fbc').innerHTML=cap||x.capEmpty;
- $('fbt').innerHTML=(mode==='chord'?x.fbChord:mode==='pent'?x.fbPent:x.fbScale)+(mode==='pent'?' '+gq('pent'):'');
- document.querySelectorAll('#mode button').forEach(b=>{b.classList.toggle('on',b.dataset.m===mode);b.textContent=x['m'+{pent:'Pent',scale:'Scale',chord:'Chord'}[b.dataset.m]]});
- document.querySelectorAll('#lab button').forEach(b=>{b.classList.toggle('on',b.dataset.l===lab);b.textContent=b.dataset.l==='deg'?x.lDeg:x.lName});
-}
-const ro=new ResizeObserver(draw);ro.observe(fb);
-
-/* ---------- lessons ---------- */
-function lessons(){
- const {k,us}=A;if(!k)return [];
- const C=(iv,q,ext='')=>({root:(k.t+iv)%12,q,ext,bass:null}),I=C(0,k.minor?'m':'M'),IV=C(5,k.minor?'m':'M'),V=C(7,'M'),V7=C(7,'M','7'),VI=k.minor?C(8,'M'):C(9,'m');
- const n=c=>esc(cname(c)),song=esc($('nm').value.trim()||tr('tahle písnička','this song')),key=keyName(k),others=us.filter(u=>role(u,k).iv!==0);
- const mr=k.minor?k.t:(k.t+9)%12,fret=(mr-4+12)%12||12,ps=k.minor?[0,3,5,7,10,12]:[0,2,4,7,9,12],base=52+((k.t-4+12)%12);
- const pick=(arr,cnt)=>{const o=[];for(const a of arr)if(!o.some(b=>b===a))o.push(a);return o.slice(0,cnt)};
- const q1=pick([n(I),...others.map(n),n(IV),n(V),n(VI)],3);
- const nonHome=others[0]||V,nr=role(nonHome,k).num,q3=pick([nr,'I','IV','V','vi','VI','VII'],3);
- const tgtK=k.minor?(k.t===9?4:9):(k.t===7?0:7),sh=(tgtK-k.t+12)%12,s0=seq().slice(0,8),s1=s0.map(c=>({...c,root:(c.root+sh)%12,bass:c.bass==null?null:(c.bass+sh)%12}));
- const kn={root:tgtK,q:k.minor?'m':'M',ext:'',bass:null},best=capos(us)[0];
- const f0=flat;flat=false;const shapes=us.slice(0,6).map(u=>esc(cname(u,best.k))).join(' ');flat=f0;
- const Rn=nn(k.t),fl0=flat;flat=[5,10,3,8,1].includes(k.t);const maj3=[0,4,7].map(t=>nn(k.t+t)).join(' ');flat=[5,10,3,8,1].includes((k.t+3)%12);const min3=[0,3,7].map(t=>nn(k.t+t)).join(' ');flat=fl0;
- const H=cz?'H':'B';
- return [
- {t:tr('Domov','Home'),b:tr(`Každá písnička má jeden akord, kde je doma. Tam většinou začíná a skoro vždy končí. V písničce ${song} je domov <b>${n(I)}</b>.`,`Every song has one chord where it feels at home. It usually starts there and almost always ends there. In ${song} home is <b>${n(I)}</b>.`),
-  e:[[tr('▶ Skonči doma','▶ End at home'),[I,IV,V,I]],[tr('▶ Skonči jinde','▶ End elsewhere'),[I,IV,I,V]]],en:tr('Slyšíš, že druhá verze zůstane viset ve vzduchu? Ucho chce domů.','Hear how the second one hangs in the air? Your ear wants to go home.'),
-  q:tr(`Který akord je v písničce ${song} domov?`,`Which chord is home in ${song}?`),o:q1,ok:0,w:tr(`Domov je ${n(I)}: písnička se k němu pořád vrací.`,`Home is ${n(I)}: the song keeps coming back to it.`)},
- {t:tr('Napětí','Tension'),b:tr(`Jeden akord táhne domů nejvíc. Je to pátý akord od domova, proto mu říkáme pětka (V). V tónině ${key} je to <b>${n(V)}</b>. Se sedmičkou (${n(V7)}) táhne ještě víc.`,`One chord pulls home more than any other. It’s the fifth chord from home, so we call it five (V). In ${key} it’s <b>${n(V)}</b>. With a 7 (${n(V7)}) it pulls even harder.`),
-  e:[[tr('▶ Napětí → domov','▶ Tension → home'),[V7,I]],[tr('▶ Jen napětí','▶ Tension only'),[I,V7]]],en:tr('Po druhé ukázce máš chuť dohrát domov sám, že?','After the second one you want to play home yourself, right?'),
-  q:tr(`Který akord v tónině ${key} táhne nejvíc domů?`,`Which chord in ${key} pulls home the most?`),o:pick([n(V),n(IV),n(VI)],3),ok:0,w:tr(`${n(V)} je pětka (V), nejsilnější napětí.`,`${n(V)} is the five (V), the strongest tension.`)},
- {t:tr('Čísla místo názvů','Numbers, not names'),b:tr(`Když akordy očísluješ od domova (domov = I), uvidíš skryté vzorce. Tvoje písnička je <b>${s0.map(c=>role(c,k).num).join(' – ')}</b>. Od ${n(kn)} by stejná písnička byla ${s1.map(n).join(' ')}.`,`Number the chords from home (home = I) and hidden patterns appear. Your song is <b>${s0.map(c=>role(c,k).num).join(' – ')}</b>. Starting from ${n(kn)} the same song would be ${s1.map(n).join(' ')}.`),
-  e:[[tr('▶ Originál','▶ Original'),s0],[tr('▶ Posunuto','▶ Moved'),s1]],en:tr('Pořád stejná písnička, jen výš nebo níž. Čísla zůstala.','Still the same song, just higher or lower. The numbers stay.'),
-  q:tr(`Jaké číslo má akord ${n(nonHome)} v téhle písničce?`,`What number does ${n(nonHome)} have in this song?`),o:q3,ok:0,w:tr(`Od domova ${n(I)} je ${n(nonHome)} stupeň ${nr}.`,`Counting from home ${n(I)}, ${n(nonHome)} is degree ${nr}.`)},
- {t:tr('Dur a moll','Major and minor'),b:tr(`Dur a moll se liší jen jedním tónem, tím prostředním (tercie). V moll je o jeden pražec níž a to stačí na smutnou náladu. ${Rn} dur: <b>${maj3}</b> · ${Rn} moll: <b>${min3}</b>.`,`Major and minor differ by one note, the middle one (the third). In minor it’s one fret lower, and that’s enough for a sad mood. ${Rn} major: <b>${maj3}</b> · ${Rn} minor: <b>${min3}</b>.`),
-  e:[[tr('▶ Dur','▶ Major'),[C(0,'M')]],[tr('▶ Moll','▶ Minor'),[C(0,'m')]]],en:tr('Poslechni si je hned po sobě. Jeden tón, úplně jiná nálada.','Play them back to back. One note, a totally different mood.'),
-  q:tr('Čím se liší moll od duru?','How is minor different from major?'),o:tr(['Prostřední tón je o pražec níž','Hraje se pomaleji','Má o jeden tón víc'],['The middle note is one fret lower','It’s played slower','It has one more note']),ok:0,w:tr('Jen tercie, prostřední tón, je o půltón níž.','Only the third, the middle note, is a half step lower.')},
- {t:tr('Kde hrát sólo','Where to solo'),b:tr(`Pentatonika je pět tónů z tóniny, které nad písničkou skoro nikdy nezní špatně. Většina rockových sól stojí na ní. Tady jsou to <b>${(k.minor?[0,3,5,7,10]:[0,2,4,7,9]).map(t=>nn(k.t+t)).join(' ')}</b> a box 1 začíná na <b>${fret}. pražci</b> basové E struny.`,`The pentatonic is five notes from the key that almost never sound wrong over the song. Most rock solos are built on it. Here it’s <b>${(k.minor?[0,3,5,7,10]:[0,2,4,7,9]).map(t=>nn(k.t+t)).join(' ')}</b> and box 1 starts at <b>fret ${fret}</b> on the low E string.`),
-  e:[[tr('▶ Zahraj pentatoniku','▶ Play the pentatonic'),ps.map(t=>base+t),{notes:true,step:.38}],[tr('Ukaž na hmatníku','Show on the fretboard'),[],{act:()=>{mode='pent';setView('song');$('board').scrollIntoView({behavior:'smooth'})}}]],en:tr('Na hmatníku je box zvýrazněný oranžově.','The box is highlighted in orange on the fretboard.'),
-  q:tr('Na kterém pražci basové E struny začíná box 1?','On which fret of the low E string does box 1 start?'),o:pick([fret,(fret+2)%12||12,(fret+9)%12||12].map(String),3),ok:0,w:tr(`Na ${fret}. pražci je tón ${nn(mr)}, tam box začíná.`,`Fret ${fret} is the note ${nn(mr)}, the box starts there.`)},
- {t:tr('Kapodastr','Capo'),b:tr(`Kapodastr posune celou kytaru výš. Hraješ stejné tvary, ale znějí o tolik půltónů výš, na kolikátém pražci kapo je. Pro tuhle písničku: <b>${best.k?S.cs.capoAt(best.k):S.cs.noCapo}</b> a hraješ ${shapes}.`,`A capo moves the whole guitar up. You play the same shapes, they sound as many half steps higher as the fret the capo is on. For this song: <b>${best.k?S.en.capoAt(best.k):S.en.noCapo}</b> and you play ${shapes}.`),
-  e:[[tr('▶ Tvar G bez kapa','▶ G shape, no capo'),[{root:7,q:'M',ext:'',bass:null}]],[tr('▶ Tvar G, kapo na 2','▶ G shape, capo on 2'),[{root:9,q:'M',ext:'',bass:null}]]],en:tr('Stejný tvar, ale druhý zní o kus výš. Je to A.','Same shape, the second sounds higher. It’s an A.'),
-  q:tr('Kapo je na 2. pražci a hraješ tvar G. Jaký akord zní?','Capo on fret 2 and you play a G shape. Which chord sounds?'),o:['A','G',H],ok:0,w:tr('G posunuté o dva půltóny nahoru je A.','G moved up two half steps is A.')}
- ];
-}
-function renderLes(){
- regN=Math.max(regN,500);const L=lessons(),x=X();
- if(!L.length){$('ll').innerHTML='';$('lesson').innerHTML=`<p class="empty">${x.empty}</p>`;return}
- if(les>=L.length)les=0;const l=L[les];
- $('ll').innerHTML=L.map((m,i)=>`<button class="${done.includes(i)?'dn':''}${i===les?' on':''}" data-li="${i}"><span class="n">${done.includes(i)?'✓':i+1}</span>${m.t}</button>`).join('');
- const rot=($('nm').value.length+les)%l.o.length,ord=l.o.map((v,i)=>i).map(i=>(i+rot)%l.o.length);
- $('lesson').innerHTML=`<div class="lbl">${x.lesOf(les+1,L.length)}</div><h2>${l.t}</h2><p class="body">${l.b}</p>
- <div class="exp"><div class="row">${l.e.map(([lb,it,o])=>pbtn(lb,it,{...(o||{}),cls:'fire'})).join('')}</div><p class="t" style="margin-top:10px">${l.en}</p></div>
- <div class="quiz"><p class="qq">${l.q}</p><div class="opts">${ord.map(i=>`<button data-ok="${i===l.ok?1:0}">${l.o[i]}</button>`).join('')}</div><p class="qfb" id="qfb"></p></div>
- <div class="row nav">${les?`<button data-ln="-1">${x.prev}</button>`:''}${les<L.length-1?`<button class="pri" data-ln="1">${x.next}</button>`:''}</div>`;
- $('lesson').dataset.w=l.w;
-}
-$('ll').addEventListener('click',e=>{const b=e.target.closest('[data-li]');if(b){les=+b.dataset.li;stopPlay();renderLes()}});
-$('lesson').addEventListener('click',e=>{
- const n=e.target.closest('[data-ln]');if(n){les+=+n.dataset.ln;stopPlay();renderLes();window.scrollTo({top:0,behavior:'smooth'});return}
- const b=e.target.closest('[data-ok]');if(!b)return;const ok=b.dataset.ok==='1';
- b.classList.add(ok?'ok':'no');$('qfb').textContent=ok?X().right+' '+$('lesson').dataset.w:X().wrong;
- if(ok&&!done.includes(les)){done.push(les);store.set('pcz-done',done);renderTabs();const s=document.querySelector(`[data-li="${les}"]`);if(s){s.classList.add('dn');s.querySelector('.n').textContent='✓'}}
-});
-
-/* ---------- ask Claude ---------- */
-function renderAsk(){
- $('aiBox').hidden=!sample;if(sample)$('aq').placeholder=X().askPh;
- const {k,us}=A,el=$('faq');if(!k){el.innerHTML='';return}
- const keep=regN;regN=300;
- const C=(iv,q,ext='')=>({root:(k.t+iv)%12,q,ext,bass:null}),I=C(0,k.minor?'m':'M'),Ia=C(0,k.minor?'M':'m'),IV=C(5,k.minor?'m':'M'),V=C(7,'M');
- const n=c=>esc(cname(c)),song=esc($('nm').value.trim()||tr('tahle písnička','this song')),key=keyName(k);
- const mr=k.minor?k.t:(k.t+9)%12,fret=(mr-4+12)%12||12,pent=(k.minor?[0,3,5,7,10]:[0,2,4,7,9]),base=52+((k.t-4+12)%12);
- const NAT={maj:['0M','2m','4m','5M','7M','9m','11d'],min:['0m','2d','3M','5m','7m','8M','10M']}[k.minor?'min':'maj'];
- const best=capos(us)[0],f0=flat;flat=false;const shapes=us.slice(0,6).map(u=>esc(cname(u,best.k))).join(' ');flat=f0;
- const it=[];
- it.push([tr(`Proč ${song} zní ${k.minor?'smutně':'vesele'}?`,`Why does ${song} sound ${k.minor?'sad':'happy'}?`),
-  k.minor?tr(`Písnička je v moll, domov je <b>${n(I)}</b>. Mollový akord má prostřední tón o jeden pražec níž než durový a ucho to slyší jako smutek. Poslechni si rozdíl:`,`The song is in minor, home is <b>${n(I)}</b>. A minor chord has its middle note one fret lower than major, and the ear hears that as sadness. Hear the difference:`)
-  :tr(`Písnička je v duru, domov je <b>${n(I)}</b>. Durový akord má prostřední tón o pražec výš než mollový, proto zní světle. Poslechni si rozdíl:`,`The song is in major, home is <b>${n(I)}</b>. A major chord has its middle note one fret higher than minor, so it sounds bright. Hear the difference:`),
-  pbtn('▶ '+cname(I),[I])+pbtn('▶ '+cname(Ia),[Ia])]);
- it.push([tr('Jak nad ní hrát sólo?','How do I solo over it?'),
-  tr(`Hraj ${key} pentatoniku: <b>${pent.map(t=>nn(k.t+t)).join(' ')}</b>. Box 1 začíná na <b>${fret}. pražci</b> basové E struny. Když chceš, aby fráze zněla hotově, skonči na tónu <b>${nn(k.t)}</b>, to je domov.`,`Play the ${key} pentatonic: <b>${pent.map(t=>nn(k.t+t)).join(' ')}</b>. Box 1 starts at <b>fret ${fret}</b> on the low E string. To make a phrase sound finished, end on <b>${nn(k.t)}</b>, that’s home.`),
-  pbtn(tr('▶ Zahraj pentatoniku','▶ Play the pentatonic'),pent.concat(12).map(t=>base+t),{notes:true,step:.38})+pbtn(tr('Ukaž na hmatníku','Show on the fretboard'),[],{act:()=>{mode='pent';draw();$('board').scrollIntoView({behavior:'smooth'})}})]);
- for(const u of us.filter(u=>role(u,k).iv!==0).slice(0,4)){const r=role(u,k);let a=`<b>${n(u)}</b> = ${r.num} (${r.word.toLowerCase()}). ${r.tip}`;
-  const lt=(()=>{const f=flat;flat=false;const v=nn(k.t+11);flat=f;return v})();if(k.minor&&r.id==='7M')a=`<b>${n(u)}</b> = ${r.num} (${r.word.toLowerCase()}).`+' '+tr(`V čisté ${key} by tu byl ${n(C(7,'m'))}. ${n(u)} ale obsahuje tón <b>${lt}</b>, který leží jen půltón pod domovem ${nn(k.t)}, a ten táhne domů mnohem silněji. Proto zní tak dramaticky.`,`In pure ${key} this would be ${n(C(7,'m'))}. But ${n(u)} contains <b>${lt}</b>, just a half step below home ${nn(k.t)}, and that pulls home much harder. That’s why it sounds so dramatic.`);
-  else if(!NAT.includes(r.id))a+=' '+tr(`Do tóniny ${key} normálně nepatří, je vypůjčený. Proto zní překvapivě.`,`It doesn’t normally belong to ${key}, it’s borrowed. That’s why it surprises.`);
-  it.push([tr(`Proč je tu akord ${n(u)}?`,`Why is the ${n(u)} chord here?`),a,pbtn(`▶ ${cname(u)} → ${cname(I)}`,[u,I])])}
- it.push([tr('Jak ji zahrát co nejjednodušeji?','How can I play it the easiest way?'),
-  best.k?tr(`Dej kapodastr na <b>${best.k}. pražec</b> a hraj tvary <b>${shapes}</b>. Zní to stejně jako originál.`,`Put a capo on <b>fret ${best.k}</b> and play the shapes <b>${shapes}</b>. It sounds the same as the original.`):tr(`Nejsnazší je to bez kapodastru: <b>${shapes}</b>.`,`It’s easiest without a capo: <b>${shapes}</b>.`),'']);
- it.push([tr('Kterým akordem písničku ukončit?','Which chord should I end on?'),
-  tr(`Akordem <b>${n(I)}</b>, to je domov. Když skončíš jinde, písnička zůstane viset ve vzduchu.`,`On <b>${n(I)}</b>, that’s home. End anywhere else and the song hangs in the air.`),
-  pbtn(tr('▶ Konec doma','▶ End at home'),[IV,V,I])+pbtn(tr('▶ Konec jinde','▶ End elsewhere'),[IV,I,V])]);
- el.innerHTML=it.map(([q,a,b])=>`<details class="fq"><summary>${q}</summary><div><p>${a}</p>${b?`<div class="row">${b}</div>`:''}</div></details>`).join('');
- regN=keep;
-}
-let askCtl=null;
-async function ask(q){
- if(!sample||!q.trim())return;if(askCtl)askCtl.abort();askCtl=new AbortController();const {k,us}=A,aa=$('aa');aa.textContent=X().asking;
- const lv={beg:'complete beginner in music theory (plays chords by ear, knows no theory terms)',mid:'knows what major and minor are, little else',adv:'knows degrees and scales'}[level||'beg'];
- const ctx=k?`Song: ${$('nm').value.trim()||'untitled'}\nChords in order: ${seq().map(c=>cname(c)).join(' ')}\nDetected key: ${keyName(k)}\nChord roles: ${us.map(u=>{const r=role(u,k);return cname(u)+' = '+r.num+' ('+r.word+')'}).join(', ')}`:'No song loaded.';
- const prompt=`You are a warm, practical guitar teacher inside the app "Proč to zní" that teaches music theory through songs the student already plays.\nStudent: ${lv}.\nAnswer in ${lang==='cs'?'Czech':'English'}.${cz?' Use Czech/German chord names: H means B natural, B means B flat.':''}\nRules: max 5 short sentences, or up to 4 short lines. Plain everyday words; if you use a theory term, explain it in brackets in a few words. Tie the answer to the student's song and chords. Suggest something to try on the guitar or listen for when useful. No markdown symbols, no headings.\n\n${ctx}\n\nQuestion: ${q}`;
- try{const r=await sample(prompt,{signal:askCtl.signal,cache:false,onText:({text})=>{aa.textContent=text}});aa.textContent=r.text}
- catch(e){if(e&&e.name==='AbortError')return;if(e&&e.code==='not_granted'){sample=null;renderAsk();return}aa.textContent=X().askErr}
-}
-$('ab').onclick=()=>ask($('aq').value);
-(async()=>{try{const s=window.claude&&window.claude.use?await window.claude.use('sample'):null;if(s){sample=s;renderAsk()}}catch(e){}})();
-
-/* ---------- glossary sheet ---------- */
-document.addEventListener('click',e=>{const b=e.target.closest('[data-g]');if(!b)return;e.stopPropagation();const g=GL[b.dataset.g][lang==='cs'?0:1];sheetTerm=g[0];
- $('shT').textContent=g[0];$('shX').textContent=g[1];$('shA').hidden=!sample;$('shA').textContent=X().askMore;$('shC').textContent=X().close;$('sheet').hidden=false});
-$('shC').onclick=()=>{$('sheet').hidden=true};
-$('shA').onclick=()=>{$('sheet').hidden=true;setView('song');const q=tr(`Vysvětli mi na téhle písničce: ${sheetTerm}`,`Explain using this song: ${sheetTerm}`);$('aq').value=q;$('aiBox').scrollIntoView({behavior:'smooth'});ask(q)};
-
-/* ---------- views, language, level ---------- */
-function renderTabs(){$('tabL').textContent=X().tabLes+` ${done.length}/6`;$('tabS').classList.toggle('on',view==='song');$('tabL').classList.toggle('on',view==='les')}
-function setView(v){view=v;stopPlay();$('vSong').hidden=v!=='song';$('vLes').hidden=v!=='les';renderTabs();chips();if(v==='les')renderLes();else draw()}
-$('tabS').onclick=()=>setView('song');$('tabL').onclick=()=>setView('les');
-function applyLang(){
- const x=X();document.documentElement.lang=lang;
- document.querySelectorAll('[data-t]').forEach(el=>{const v=x[el.dataset.t];if(typeof v==='string')el.textContent=v});
- $('tx').placeholder=x.ph;$('go').textContent=timer?x.stopM:x.start;
- document.querySelectorAll('#lang button,#lang2 button').forEach(b=>b.classList.toggle('on',b.dataset.l===lang));
- $('lvb').textContent=x.lvlBtn+': '+(level?x.lv[level][0]:'–');
- $('lv').innerHTML=Object.entries(x.lv).map(([kk,[a,b]])=>`<button data-lv="${kk}"><b>${a}</b><span>${b}</span></button>`).join('');
- $('cz').checked=cz;renderTabs();upd();update();
-}
-function setLang(l){if(l===lang)return;lang=l;cz=l==='cs';store.set('pcz-lang',lang);store.set('pcz-cz',cz);applyLang()}
-$('lang').onclick=e=>{const b=e.target.closest('button');if(b)setLang(b.dataset.l)};
-$('lang2').onclick=e=>{const b=e.target.closest('button');if(b)setLang(b.dataset.l)};
-$('lvb').onclick=()=>{$('ov').hidden=false};
-$('lv').onclick=e=>{const b=e.target.closest('[data-lv]');if(!b)return;level=b.dataset.lv;store.set('pcz-level',level);$('ov').hidden=true;applyLang()};
-
-$('chips').addEventListener('click',e=>{const b=e.target.closest('.chip');if(b){load(b.dataset.id);if(view==='les')renderLes()}});
-$('ana').addEventListener('click',e=>{const b=e.target.closest('.cd');if(!b)return;selIdx=+b.dataset.i;mode='chord';renderAna();draw();play([A.us[selIdx]])});
-$('tx').addEventListener('input',()=>{selIdx=0;update()});$('nm').addEventListener('input',()=>{upd();renderAsk()});
-$('tm').onclick=()=>{shift=Math.max(-11,shift-1);update()};$('tp').onclick=()=>{shift=Math.min(11,shift+1);update()};$('t0').onclick=()=>{shift=0;update()};
-$('cz').onchange=e=>{cz=e.target.checked;store.set('pcz-cz',cz);update()};
-$('mode').onclick=e=>{const b=e.target.closest('button');if(b){mode=b.dataset.m;draw()}};
-$('lab').onclick=e=>{const b=e.target.closest('button');if(b){lab=b.dataset.l;draw()}};
-$('save').onclick=()=>{const name=$('nm').value.trim()||'—',text=$('tx').value;let s=mine.find(v=>v.id===cur);
- if(s){s.name=name;s.text=text}else{s={id:'m'+Date.now(),name,text};mine.push(s);cur=s.id}store.set('pcz-songs',mine);chips();$('msg').textContent=X().saved};
-$('new').onclick=()=>{load('');$('nm').focus()};
-$('del').onclick=()=>{if(!mine.some(v=>v.id===cur)){$('msg').textContent=X().noDel;return}mine=mine.filter(v=>v.id!==cur);store.set('pcz-songs',mine);load('x1')};
-
-/* ---------- metronome ---------- */
-let bpm=store.get('pcz-bpm',80),beats=4,timer=null,nextT=0,beat=0,taps=[],mg=null;
-function setB(v){bpm=Math.max(40,Math.min(220,Math.round(v)));$('bpm').textContent=bpm;$('br').value=bpm;store.set('pcz-bpm',bpm)}
-function dots(){$('dots').innerHTML=Array.from({length:beats},()=>'<span class="dot"></span>').join('');document.querySelectorAll('#bt button').forEach(b=>b.classList.toggle('on',+b.dataset.b===beats))}
-function click(t,b){const o=ac.createOscillator(),g=ac.createGain();o.frequency.value=b===0?1600:1000;g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.5,t+.002);g.gain.exponentialRampToValueAtTime(.0001,t+.05);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+.06);
- setTimeout(()=>{document.querySelectorAll('.dot').forEach((d,i)=>{d.classList.toggle('hit',i===b);d.classList.toggle('one',i===0)})},Math.max(0,(t-ac.currentTime)*1000))}
-function tick(){while(nextT<ac.currentTime+.1){click(nextT,beat);nextT+=60/bpm;beat=(beat+1)%beats}}
-$('go').onclick=()=>{if(timer){clearInterval(timer);timer=null;$('go').textContent=X().start;document.querySelectorAll('.dot').forEach(d=>d.classList.remove('hit'));return}
- try{actx();nextT=ac.currentTime+.06;beat=0;timer=setInterval(tick,25);$('go').textContent=X().stopM}catch(e){}};
-$('br').oninput=e=>setB(+e.target.value);$('bm').onclick=()=>setB(bpm-1);$('bp').onclick=()=>setB(bpm+1);
-$('bt').onclick=e=>{const b=e.target.closest('button');if(b){beats=+b.dataset.b;beat=0;dots()}};
-$('tap').onclick=()=>{const n=performance.now();taps=taps.filter(t=>n-t<2500);taps.push(n);if(taps.length>1)setB(60000/((taps[taps.length-1]-taps[0])/(taps.length-1)))};
-
-setB(bpm);dots();
-const s0=EXAMPLES[0];$('nm').value=s0.name;$('tx').value=s0.text;
-applyLang();setView('song');
-if(!level)$('ov').hidden=false;
-}
-</script>
+<script src="js/core.js"></script>
+<script src="js/i18n.js"></script>
+<script src="js/chords.js"></script>
+<script src="js/lessons.js"></script>
+<script src="js/song.js"></script>
+<script src="js/train.js"></script>
+<script src="js/tuner.js"></script>
+<script src="js/main.js"></script>
 </body>
 </html>
