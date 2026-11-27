@@ -33,7 +33,7 @@ function renderPlay(){
  const x=X(),cp=pcapo[cur]||0,best=capos(A.us)[0];playCh=[];
  const body=songBody(curSong().text);
  const shapes=uniq(playCh.map(c=>ckey2(c))).map(k=>playCh.find(c=>ckey2(c)===k));
- const welcome=!mine.length?`<div class="welcome"><h3>${x.welcomeT}</h3><ol>${x.welcomeSteps.map(s=>`<li>${s}</li>`).join('')}</ol><button class="fire" id="wAdd">${x.welcomeBtn}</button><p class="t">${x.welcomeEx}</p></div>`:'';
+ const welcome=!mine.length?`<div class="welcome"><div class="wrow"><b>${x.welcomeT}</b><button class="fire" id="wAdd">${x.welcomeBtn}</button></div><details><summary>${x.welcomeHow}</summary><ol>${x.welcomeSteps.map(s=>`<li>${s}</li>`).join('')}</ol></details></div>`:'';
  const status=[isSimp()?`<button class="pill" id="simpX">${x.simpPill} ✕</button>`:'',cp?`<span class="pill">${x.capoShort} ${cp}</span>`:'',shift?`<span class="pill">${x.transposed(shift)}</span>`:''].join('');
  $('p-play').innerHTML=welcome+`<div class="pbar">
   <button class="${scrOn?'fire':'pri'}" id="scrBtn">${scrOn?x.scrStop:x.scrGo}</button>
@@ -45,7 +45,7 @@ function renderPlay(){
   ${adjOpen&&!scrOn?`<div class="adj"><div class="stp"><span class="muted">${x.simpL}</span><button id="simpT" class="${isSimp()?'on':''}">${isSimp()?x.simpOn:x.simpOff}</button></div>${stepper('fs',x.fontL,fsz)}${stepper('cp',x.capoShort,cp)}${stepper('tr',x.transpL,(shift>0?'+':'')+shift)}${stepper('sp',x.speedL,scrSpd)}<div class="stp"><span class="muted">${x.stateL}</span>${repChip(cur)}</div></div>`:''}
  </div>
  ${best.k&&best.k!==cp?`<p class="t capnote"><button class="link" id="cpBest">${x.capoTry(best.k)}</button></p>`:''}${cp?`<p class="t capnote">${x.capoNote(cp)}</p>`:''}
- ${!isSimp()&&shapes.some(c=>c.ext||c.bass!=null||c.q==='d'||c.q==='a'||c.q==='s'||diffS(c)>1)?`<p class="t capnote"><button class="link" id="simpH">${x.simpHint}</button></p>`:''}
+ ${!isSimp()&&shapes.some(c=>c.bass!=null||/maj|9|11|13|6|sus|add/.test(c.ext||'')||c.q==='d'||c.q==='a'||c.q==='s'||diffS(c)>1)?`<p class="t capnote"><button class="link" id="simpH">${x.simpHint}</button></p>`:''}
  ${shapes.length?`<div class="cbar" aria-label="${esc(x.chordsInSong)}">${shapes.map((c,i)=>`<button class="cbi" data-cbi="${i}"><b>${esc(cname(tp(c,cp),cp))}</b>${diag(vFor(c))}</button>`).join('')}</div>`:''}
  <div class="sheetv" style="font-size:${camp?fsz+6:fsz}px">${body}</div>
  <p class="t hint">${x.playHint}</p>`;
@@ -200,7 +200,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('sPaste').onclick=async()=>{try{const t=await navigator.clipboard.readText();if(t){$('tx').value=t;detLine()}else toast(X().pasteFail)}catch(e){toast(X().pasteFail)}};
  $('sSave').onclick=()=>{const name=$('nm').value.trim()||'—',text=$('tx').value;let s=mine.find(v=>v.id===editId);if(s){s.name=name;s.text=text;store.set('pcz-songs',mine)}else s=addSong(name,text);pickSong(s.id);$('songOv').hidden=true;sub='play';refreshView()};
  $('sDel').onclick=()=>{$('sDelQ').hidden=false};$('sDelN').onclick=()=>{$('sDelQ').hidden=true};
- $('sDelY').onclick=()=>{const i=mine.findIndex(v=>v.id===editId);if(i<0)return;lastDeleted={s:mine[i],i};mine.splice(i,1);store.set('pcz-songs',mine);if(cur===editId){cur='x1';store.set('pcz-cur',cur)}$('sList').hidden=false;$('sEdit').hidden=true;renderSongList();refreshView();
+ $('sDelY').onclick=()=>{const i=mine.findIndex(v=>v.id===editId);if(i<0)return;lastDeleted={s:mine[i],i};mine.splice(i,1);store.set('pcz-songs',mine);if(cur===editId){cur='l1';store.set('pcz-cur',cur)}$('sList').hidden=false;$('sEdit').hidden=true;renderSongList();refreshView();
   toast(X().deleted(lastDeleted.s.name),X().undo,()=>{if(!lastDeleted)return;mine.splice(lastDeleted.i,0,lastDeleted.s);store.set('pcz-songs',mine);lastDeleted=null;if(!$('songOv').hidden)renderSongList();refreshView()})};
  $('impY').onclick=()=>{if(!pendingImp)return;const s=addSong(pendingImp.name,pendingImp.text);pendingImp=null;pickSong(s.id);$('impOv').hidden=true;sub='play';toast(X().importDone(s.name));if(view!=='song')go('song');else refreshView()};
  $('impN2').onclick=()=>{$('impOv').hidden=true;pendingImp=null};

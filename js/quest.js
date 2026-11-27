@@ -173,7 +173,7 @@ function qRender(){
  <div class="qcard"><p class="qpr">${t.pr}</p>${body}
  ${showBoard?`<div class="fbwrap"><div class="fb" id="qfb"><svg></svg></div></div>`:''}
  ${t.kind!=='choice'?`<div class="qheard">${showBoard&&!Q.mic&&!t.done?(Q.heard?x.qTapWas(Q.heard):x.qTap):Q.mic?`<span class="dotm on"></span> ${t.done?'✓ '+(t.after||x.right):Q.heard?x.heard(Q.heard)+(t.miss?' · '+x.qNotYet:''):x.qListen}`:t.done?'✓ '+(t.after||x.right):''}</div>`:''}
- ${(t.rev||t.miss>=2)&&!t.done&&t.hint?`<p class="qhint">💡 ${t.hint}</p>`:''}</div>
+ ${Q.mic&&!t.done&&t.kind!=='choice'?`<div class="center">${mhLink()}</div>`:''}${(t.rev||t.miss>=2)&&!t.done&&t.hint?`<p class="qhint">💡 ${t.hint}</p>`:''}</div>
  ${!Q.mic&&(t.kind==='pc'||(t.kind==='seq'&&!t.midi))&&!t.done?`<div class="qkeys">${[...Array(12).keys()].map(p=>`<button data-qk="${p}">${nsh(p)}</button>`).join('')}</div>`:''}
  <div class="lbar static">${t.kind!=='choice'&&!t.done?`<button data-q="hint">${x.qHintB}</button>`:''}${t.done&&t.kind==='choice'?`<button class="fire" data-q="adv">${x.cont}</button>`:`<button data-q="skip">${t.done?x.cont:x.qSkip}</button>`}</div>`;
  bindHead();qBind();

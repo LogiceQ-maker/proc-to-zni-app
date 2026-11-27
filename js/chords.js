@@ -48,8 +48,8 @@ function chkStop(){if(CK){clearTimeout(CK.to);CK=null;if(Mic.ccb===chkHear){Mic.
 async function chkStart(){
  const x=X();chkStop();try{actx()}catch(e){}if(!(await micStart()))return;
  CK={acc:new Float32Array(12),n:0,on:false,t0:0,to:0};Mic.cb=null;Mic.ccb=chkHear;
- $('chChk').innerHTML=`<div class="chk wait"><span class="dotm on"></span> ${x.chkListen(esc(cname(chkC)))}</div><button id="chkX">${x.stopM}</button>`;
- CK.to=setTimeout(()=>{if(CK&&!CK.n){chkStop();$('chChk').innerHTML=`<div class="chk bad">${x.chkQuiet}</div><button class="fire" id="chkGo">🎤 ${x.chkAgain}</button>`}},8000);
+ $('chChk').innerHTML=`<div class="chk wait"><span class="dotm on"></span> ${x.chkListen(esc(cname(chkC)))} ${mhLink()}</div><button id="chkX">${x.stopM}</button>`;
+ CK.to=setTimeout(()=>{if(CK&&!CK.n){chkStop();$('chChk').innerHTML=`<div class="chk bad">${x.chkQuiet} ${mhLink()}</div><button class="fire" id="chkGo">🎤 ${x.chkAgain}</button>`}},8000);
 }
 function chkHear(ch,r,onset){
  if(!CK)return;const now=performance.now();
@@ -63,10 +63,11 @@ function chkResult(acc,n){
  const P=pcsOf(c),missing=P.filter(p=>ch[p]<0.045),extra=[];for(let p=0;p<12;p++)if(!P.includes(p)&&ch[p]>0.16)extra.push(p);
  // what does it sound like? compare with all major/minor/7 chords
  let best=null,bs=-9;for(let r=0;r<12;r++)for(const q of ['M','m']){const k=C0(r,q,'');const sc=chordFit(ch,k);if(sc>bs){bs=sc;best=k}}
- const mine=chordFit(ch,c),like=best&&bs>mine+.08&&pcsOf(best).join()!==P.join()?best:null;
+ const mine=chordFit(ch,c);const like=best&&bs>mine+.08&&pcsOf(best).join()!==P.join()?best:null;
  const where=p=>{if(!v)return '';const out=[];v.f.forEach((f,i)=>{if(f>=0&&(STRN[i]+f)%12===p)out.push(x.chkStr(nsh(STRN[i]),i===5,f))});return out.join(', ')};
  let cls='ok',msg=x.chkGood(esc(cname(c)));
- if(n<4){cls='bad';msg=x.chkQuiet}
+ if(n<4){cls='bad';msg=x.chkQuiet+' '+mhLink()}
+ else if(bs<.5){cls='bad';msg=x.chkUnsure+' '+mhLink()}
  else if(missing.length||like||extra.length){cls='bad';const parts=[];
   if(like)parts.push(x.chkLike(esc(cname(like))));
   for(const p of missing)parts.push(x.chkMiss(nn(p),where(p)));

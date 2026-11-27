@@ -1,30 +1,30 @@
 'use strict';
 /* ---------- 5 minutes: daily plan + all practice tools ---------- */
 let earSt=store.get('pcz-ear',{}),FV={scr:'home',plan:false},EX=null,CH=null,PA=null,EAR=null,CARD=null,YT=null;
-const PLAN=['changes','notes','cards','ear'];
+const PLAN=['changes','notes','rhythm','cards','ear'];
 const planToday=()=>planDone[today()]||[];
 function markPlan(s){const t=today(),a=planDone[t]||[];if(!a.includes(s)){a.push(s);planDone[t]=a;store.set('pcz-plan',planDone)}}
 function updToday(){const t=plog[today()]||0,x=X();const a=$('todayT');if(a){a.textContent=fmt(Math.min(t,5999))+' / 5:00';$('todayP').style.width=Math.min(100,t/3)+'%';$('streakT').textContent=t>=300?x.goal+' '+x.streak(streak()):x.streak(streak())}const et=$('exToday');if(et)et.textContent=fmt(t)+' / 5:00'}
-function fiveGo(scr,plan){stopAll();if(scr==='changes')CH=null;if(scr==='ear')EAR=null;if(scr==='deg')DQ=null;if(scr==='cards')CARD=null;FV={scr,plan:!!plan};activeTrain=!['home','notes','prog','path'].includes(scr)?scr:null;setMicCb();renderFive();window.scrollTo(0,0)}
-function stopAll(){stopPlay();if(typeof Q!=='undefined'&&Q&&Q.to)clearTimeout(Q.to);if(PA&&PA.on)paStop();if(CH&&CH.tm){clearInterval(CH.tm)}chMicOff();if(YT&&YT.iv){clearInterval(YT.iv)}if(YT&&YT.player&&YT.player.pauseVideo)try{YT.player.pauseVideo()}catch(e){}}
+function fiveGo(scr,plan){stopAll();if(scr==='changes')CH=null;if(scr==='ear')EAR=null;if(scr==='deg')DQ=null;if(scr==='jam')JM=null;if(scr==='rhythm'&&RT)RT.ph='setup';if(scr==='cards')CARD=null;FV={scr,plan:!!plan};activeTrain=!['home','notes','prog','path'].includes(scr)?scr:null;setMicCb();renderFive();window.scrollTo(0,0)}
+function stopAll(){stopPlay();if(typeof Q!=='undefined'&&Q&&Q.to)clearTimeout(Q.to);if(PA&&PA.on)paStop();if(CH&&CH.tm){clearInterval(CH.tm)}chMicOff();jamStop();if(typeof rtStop==='function'&&RT&&RT.on)rtStop();if(YT&&YT.iv){clearInterval(YT.iv)}if(YT&&YT.player&&YT.player.pauseVideo)try{YT.player.pauseVideo()}catch(e){}}
 function planNext(){markPlan(FV.scr==='notesEx'?'notes':FV.scr);const nx=PLAN.find(s=>!planToday().includes(s));if(!nx){fiveGo('home');return}startPlanStep(nx)}
 function startPlanStep(s){if(s==='notes'){FV={scr:'quest',plan:true};qBegin(qCurrent());window.scrollTo(0,0);return}if(s==='cards'&&!done.length){fiveGo('cards',true);return}fiveGo(s,true)}
 function head(title,mic){const x=X(),pd=planToday().length;return `<div class="exhead"><button id="exBack">${x.back5}</button><div class="row"><span class="muted" id="exToday"></span>${FV.plan?`<span class="chip on" style="min-height:32px">${x.planL} ${Math.min(pd+1,4)}/4</span>`:''}${mic?`<span class="micchip"><span class="dotm"></span><button data-mic></button></span>`:''}</div></div><p class="t micmsg"></p><h2 class="exT">${title}</h2>`}
-function nextBtn(){return FV.plan?`<button class="fire" id="planNext">${planToday().length>=3?X().planFinish:X().planNext}</button>`:''}
+function nextBtn(){return FV.plan?`<button class="fire" id="planNext">${planToday().length>=PLAN.length-1?X().planFinish:X().planNext}</button>`:''}
 function bindHead(){$('exBack').onclick=()=>fiveGo('home');const pn=$('planNext');if(pn)pn.onclick=planNext;updToday();micUI()}
 function renderFive(){
  regN=Math.max(regN,700);const x=X(),el=$('fiveC'),s=FV.scr;
  if(s==='home'){
   const pd=planToday(),all=PLAN.every(p=>pd.includes(p)),dc=dueCards().length;
-  const stepT={changes:x.ex.changes,notes:x.ex.path,cards:x.ex.cards,ear:x.ex.ear};
+  const stepT={changes:x.ex.changes,notes:x.ex.path,rhythm:x.ex.rhythm,cards:x.ex.cards,ear:x.ex.ear};
   const nx=PLAN.find(p=>!pd.includes(p));
-  el.innerHTML=`<h1 class="vt">${x.fiveT}</h1><p class="muted">${x.fiveSub}</p>
+  el.innerHTML=`<h1 class="vt">${x.fiveT}</h1><p class="muted">${x.fiveSub}</p>${tipCard()}
   <div class="panel hero"><div class="herotop"><div><div class="lbl">${x.today}</div><div class="today" id="todayT"></div></div><div class="muted" id="streakT"></div></div><div class="prog"><i id="todayP"></i></div>
-  <ol class="steps">${PLAN.map((p,i)=>`<li class="${pd.includes(p)?'dn':p===nx?'nx':''}"><span class="n">${pd.includes(p)?'✓':i+1}</span><div><b>${stepT[p][0]}</b><span>${x.planDur[i]}</span></div></li>`).join('')}</ol>
+  <ol class="steps">${PLAN.map((p,i)=>`<li class="${pd.includes(p)?'dn':p===nx?'nx':''}"><span class="n">${pd.includes(p)?'✓':i+1}</span><div><b>${stepT[p][0]}</b><span>${x.planDurK[p]}</span></div></li>`).join('')}</ol>
   ${all?`<p class="donemsg">${x.todayDone}</p>`:`<button class="fire big" id="planGo">${pd.length?x.todayCont:x.todayGo}</button>`}</div>
   <button class="prgbtn" id="toProg"><span><b>${x.progress}</b><small>${x.progressSub}</small></span><i>›</i></button>
   <details class="more5"${all?' open':''}><summary>${x.moreEx}${dc?` <em>${x.dueN(dc)}</em>`:''}</summary>
-  <div class="exs6">${['path','notes','changes','along','ear','deg','cards','yt'].map(k=>`<button class="ex" data-go="${k}"><b>${x.ex[k][0]}</b><span>${x.ex[k][1]}</span>${k==='cards'&&dc?`<em>${x.dueN(dc)}</em>`:''}</button>`).join('')}</div></details>`;
+  <div class="exs6">${['path','rhythm','jam','notes','changes','along','ear','deg','cards','yt'].map(k=>`<button class="ex" data-go="${k}"><b>${x.ex[k][0]}</b><span>${x.ex[k][1]}</span>${k==='cards'&&dc?`<em>${x.dueN(dc)}</em>`:''}</button>`).join('')}</div></details>`;
   updToday();if($('planGo'))$('planGo').onclick=()=>{if(nx)startPlanStep(nx)};$('toProg').onclick=()=>fiveGo('prog');
   el.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>fiveGo(b.dataset.go));return;
  }
@@ -37,6 +37,8 @@ function renderFive(){
  if(s==='along')return renderAlong();
  if(s==='ear')return renderEar();
  if(s==='deg')return renderDeg();
+ if(s==='jam')return renderJam();
+ if(s==='rhythm')return renderRhythm();
  if(s==='cards')return renderCards();
  if(s==='yt')return renderYT();
 }
@@ -115,7 +117,7 @@ const ckey=c=>c.root+'|'+c.q+'|'+c.ext;
 const pkey=(a,b)=>[ckey(a),ckey(b)].sort().join('~');
 function vFor(c){const vs=voicings(c);if(typeof isSimp==='function'&&isSimp()&&view==='song')return vs.slice().sort((a,b)=>a.l-b.l)[0];if(PL()==='adv'&&vs[0].l===1){const b=vs.find(v=>v.l===2);if(b)return b}return vs[0]}
 const diff=c=>vFor(c).l;
-const XP={beg:[[2,'M',9,'M'],[2,'M',4,'M'],[9,'M',4,'M'],[9,'m',4,'M'],[0,'M',7,'M'],[7,'M',2,'M']],adv:[[0,'m',5,'m'],[5,'M',10,'M'],[1,'m',8,'M'],[9,'M',2,'m'],[6,'m',1,'m'],[11,'M',4,'M'],[8,'m',1,'m']]};
+const XP={beg:[[4,'m',9,'m'],[2,'M',9,'M'],[2,'M',4,'M'],[9,'M',4,'M'],[9,'m',4,'M'],[0,'M',7,'M'],[7,'M',2,'M']],adv:[[0,'m',5,'m'],[5,'M',10,'M'],[1,'m',8,'M'],[9,'M',2,'m'],[6,'m',1,'m'],[11,'M',4,'M'],[8,'m',1,'m']]};
 const vpos=c=>{const f=vFor(c).f.filter(x=>x>0);return f.length?Math.min(...f):0};
 const vshape=c=>{const f=vFor(c).f;return f[0]<0?'A':'E'};
 const chGoal=()=>PL()==='beg'?40:60;
@@ -137,7 +139,7 @@ function renderChanges(){
   <label class="sw" style="justify-content:center"><input type="checkbox" id="chM" ${store.get('pcz-chmic',true)?'checked':''}> <span>${x.chMicL}</span></label><p class="micmsg t center"></p>
   <button class="fire big1" id="chGo">${x.chStart}</button>`;
  }
- if(CH.ph==='run'){body=`<div class="bigtimer" id="chT">${CH.left>60?CH.left-60:CH.left}</div><p class="center">${CH.left>60?x.chReady:x.chNow(esc(cname(CH.a)),esc(cname(CH.b)))}</p>${CH.mic?`<div class="chlive"><span class="dotm on"></span> ${x.chHeard} <b id="chAuto">${CH.auto||0}</b></div>`:''}<div class="pair" id="chPair">${dg(CH.a).replace('class="dgc"','class="dgc" data-w="a"')}<span class="arr">↔</span>${dg(CH.b).replace('class="dgc"','class="dgc" data-w="b"')}</div><button id="chStop">${x.stopM}</button>`}
+ if(CH.ph==='run'){body=`<div class="bigtimer" id="chT">${CH.left>60?CH.left-60:CH.left}</div><p class="center">${CH.left>60?x.chReady:x.chNow(esc(cname(CH.a)),esc(cname(CH.b)))}</p>${CH.mic?`<div class="chlive"><span class="dotm on"></span> ${x.chHeard} <b id="chAuto">${CH.auto||0}</b> ${mhLink()}</div>`:''}<div class="pair" id="chPair">${dg(CH.a).replace('class="dgc"','class="dgc" data-w="a"')}<span class="arr">↔</span>${dg(CH.b).replace('class="dgc"','class="dgc" data-w="b"')}</div><button id="chStop">${x.stopM}</button>`}
  if(CH.ph==='enter'){body=`<h3 class="center" style="font-size:28px">${CH.mic&&CH.lab?x.chMicSaid:x.chHowMany}</h3><div class="row center" style="justify-content:center;margin:14px 0"><button class="sq" data-d="-5">−5</button><button class="sq" data-d="-1">−</button><output class="bignum" id="chN">${CH.n}</output><button class="sq" data-d="1">+</button><button class="sq" data-d="5">+5</button></div><p class="t center">${CH.mic&&CH.lab?x.chMicFix:CH.mic?x.chMicNone:x.chCount}</p><div class="row" style="justify-content:center"><button class="fire" id="chSave">${x.save}</button></div>`}
  if(CH.ph==='saved'){body=`<div class="result"><h3>${x.chSaved(CH.n,best)}</h3><div class="prog"><i style="width:${Math.min(100,Math.max(best,CH.n)/G*100)}%"></i></div><p class="t">${x.chGoalN(G)} · ${x.chTip}</p><div class="row" style="margin-top:10px">${nextBtn()}<button id="chAgain">${x.again}</button><button id="chOther">${x.chOther}</button></div></div>`}
  el.innerHTML=head(x.ex.changes[0])+body;bindHead();
@@ -146,7 +148,7 @@ function renderChanges(){
  if($('chA')){$('chA').onchange=e=>{CH.a=fromKey(e.target.value);renderChanges()};$('chB').onchange=e=>{CH.b=fromKey(e.target.value);renderChanges()}}
  if($('chM'))$('chM').onchange=e=>store.set('pcz-chmic',e.target.checked);
  if($('chGo'))$('chGo').onclick=async()=>{try{actx()}catch(e){}CH.mic=false;CH.auto=0;CH.lab=null;CH.cand=null;CH.run=0;
-  if(store.get('pcz-chmic',true)){Mic.cb=null;if(await micStart()){CH.mic=true;Mic.ccb=chHear}}
+  if(store.get('pcz-chmic',true)){Mic.cb=null;if(await micStart()){CH.mic=true;Mic.fast=true;Mic.ccb=chHear}}
   CH.ph='run';CH.left=63;renderChanges();CH.tm=setInterval(()=>{CH.left--;try{if(CH.left>60||CH.left===0||CH.force)click(ac.currentTime+.01,CH.left===0||CH.left===60)}catch(e){}if(CH.left<=0){clearInterval(CH.tm);chMicOff();CH.ph='enter';CH.n=CH.mic&&CH.lab?CH.auto:(last||20);renderChanges();return}const t=$('chT');if(t)t.textContent=CH.left>60?CH.left-60:CH.left;if(CH.left===60)renderChanges()},1000)};
  if($('chF'))$('chF').onchange=e=>{CH.force=e.target.checked};
  if($('chStop'))$('chStop').onclick=()=>{clearInterval(CH.tm);chMicOff();CH.ph='setup';renderChanges()};
@@ -155,12 +157,12 @@ function renderChanges(){
  if($('chAgain'))$('chAgain').onclick=()=>{CH.ph='setup';renderChanges()};if($('chOther'))$('chOther').onclick=()=>{CH=null;renderChanges()};
 }
 
-function chMicOff(){if(Mic.ccb){Mic.ccb=null;micStop()}}
+function chMicOff(){Mic.fast=false;if(Mic.ccb){Mic.ccb=null;micStop()}}
 function chHear(ch,r){
  if(!CH||CH.ph!=='run'||CH.left>60||r<0.0035)return;
  const sa=chordFit(ch,CH.a),sb=chordFit(ch,CH.b),lab=sa>sb+.05?'a':sb>sa+.05?'b':null;if(!lab)return;
  if(lab===CH.cand)CH.run++;else{CH.cand=lab;CH.run=1}
- if(CH.run>=3&&lab!==CH.lab){if(CH.lab)CH.auto++;CH.lab=lab;const o=$('chAuto');if(o)o.textContent=CH.auto;document.querySelectorAll('#chPair [data-w]').forEach(d=>d.classList.toggle('hot',d.dataset.w===lab))}
+ if(CH.run>=2&&lab!==CH.lab){if(CH.lab)CH.auto++;CH.lab=lab;const o=$('chAuto');if(o)o.textContent=CH.auto;document.querySelectorAll('#chPair [data-w]').forEach(d=>d.classList.toggle('hot',d.dataset.w===lab))}
 }
 /* --- play along --- */
 const PATS={doby:'D-D-D-D-',tabor:'D-DU-UDU',osm:'DUDUDUDU',valcik:'D-D-D-'};
@@ -248,6 +250,50 @@ function renderDeg(){
   const d=today(),v=degSt[d]||[0,0];v[1]++;if(DQ.ans===DQ.t)v[0]++;degSt[d]=v;store.set('pcz-deg',degSt);renderDeg();setTimeout(degResolve,150)});
  if($('dgRes'))$('dgRes').onclick=degResolve;
  if($('dgNext'))$('dgNext').onclick=()=>{DQ.prev=DQ.t;DQ.t=null;renderDeg()};
+}
+
+/* --- jam: improvise over the song, the mic listens --- */
+let JM=null;
+function jamSetup(){analyze();const k=A.k||{t:9,minor:true},ch=A.cs.length?seqOf(A.cs).slice(0,8):(k.minor?[C0(k.t,'m'),C0(k.t+8,'M'),C0(k.t+10,'M'),C0(k.t+7,'M')]:[C0(k.t,'M'),C0(k.t+9,'m'),C0(k.t+5,'M'),C0(k.t+7,'M')]);
+ const pent=k.minor?[0,3,5,7,10]:[0,2,4,7,9],scale=k.minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11],mr=k.minor?k.t:(k.t+9)%12,p=(mr-4+12)%12||12;
+ const fr=p>9?p-12:p,box=fr<0?0:fr;
+ JM={k,ch,pent,scale,on:false,bpm:{beg:70,mid:84,adv:96}[PL()],bar:0,i:0,notes:0,inK:0,land:0,lands:0,lastN:null,heard:[],chal:0,box,st:0,lm:null,gap:true,tm:0,nextT:0,beat:0}}
+const JCH=()=>{const t3=JM?JM.pent.slice(0,3).map(r=>DLAB[r]).join(', '):'1, ♭3, 4';return [tr(`Hraj jen 3 tóny: ${t3}.`,`Play only 3 notes: ${t3}.`),tr('Otázka a odpověď: první fráze skončí jinde, druhá doma.','Question and answer: phrase one ends elsewhere, phrase two at home.'),tr('Na změně akordu přistaň na jeho základním tónu.','On each chord change, land on the chord’s root.'),tr('Hraj s pauzami: motiv, ticho, motiv.','Play with rests: motif, silence, motif.')]};
+function jamStop(){if(!JM)return;JM.on=false;clearInterval(JM.tm);if(Mic.cb===jamHear)Mic.cb=null}
+function jamStart(){try{actx()}catch(e){return}JM.on=true;JM.notes=0;JM.inK=0;JM.land=0;JM.lands=0;JM.bar=0;JM.i=0;JM.beat=0;JM.nextT=ac.currentTime+.15;JM.t0=Date.now();
+ const g=ac.createGain();g.gain.value=.55;g.connect(ac.destination);JM.g=g;
+ JM.tm=setInterval(()=>{if(!JM||!JM.on)return;const spb=60/JM.bpm;while(JM.nextT<ac.currentTime+.15){const b=JM.beat%4,c=JM.ch[JM.i%JM.ch.length],t=JM.nextT;
+   if(b===0||b===2)strum(c,t,'D',b===0?.16:.1,g,spb*1.9);click(t,b===0,g);
+   const bb=JM.beat;setTimeout(()=>{if(!JM||!JM.on)return;if(bb%4===0){JM.chordAt=Date.now();JM.landOpen=true;JM.cur=JM.ch[JM.i%JM.ch.length];if(Math.floor(bb/4)%4===0&&bb>0)JM.chal=(JM.chal+1)%4;jamUI()}},Math.max(0,(t-ac.currentTime)*1000));
+   JM.beat++;JM.nextT+=spb;if(JM.beat%4===0){JM.i++;JM.bar++}}},40);
+ micStart().then(ok=>{if(JM){JM.mic=ok;Mic.cb=jamHear;jamUI()}});renderJam()}
+function jamHear(p){
+ if(!JM||!JM.on)return;if(!p||p.clar<.8){JM.gap=true;JM.st=0;return}
+ const m=Math.round(p.midi);if(p.onset)JM.gap=true;if(m===JM.lm)JM.st++;else{JM.lm=m;JM.st=1}
+ if(JM.st!==2||!JM.gap)return;JM.gap=false;
+ const rel=((m-JM.k.t)%12+12)%12,kind=JM.pent.includes(rel)?'p':JM.scale.includes(rel)?'s':'x';JM.notes++;if(kind!=='x')JM.inK++;
+ if(JM.landOpen&&Date.now()-JM.chordAt<700){JM.landOpen=false;JM.lands++;const c=JM.cur;if(c&&pcsOf(c).includes(((m%12)+12)%12)){JM.land++;JM.flash='land'}}
+ JM.heard.unshift({m,kind});JM.heard=JM.heard.slice(0,8);jamUI()}
+function jamUI(){if(FV.scr!=='jam'||!JM)return;const x=X(),c=JM.cur||JM.ch[0],nx=JM.ch[(JM.i+1)%JM.ch.length];
+ const a=$('jmC');if(a)a.textContent=cname(c);const b=$('jmN');if(b)b.textContent=cname(nx);const ch=$('jmT');if(ch)ch.textContent=JCH()[JM.chal];
+ const sc=$('jmS');if(sc)sc.innerHTML=x.jamScore(JM.notes?Math.round(JM.inK/JM.notes*100):0,JM.land,JM.lands);
+ const h=$('jmH');if(h)h.innerHTML=JM.heard.map(z=>`<span class="j${z.kind}">${nsh(z.m)}</span>`).join('');
+ const fb=$('jmFb');if(fb&&JM.flash==='land'){fb.textContent=x.jamLand;fb.classList.remove('pop');void fb.offsetWidth;fb.classList.add('pop');JM.flash=null}
+ const bd=$('jmB');if(bd&&bd._o){const marks=jamMarks();bd._o.marks=marks;drawBoard(bd)}}
+function jamMarks(){const out=[],last=JM.heard[0];for(let s2=0;s2<6;s2++)for(let f=JM.box;f<=Math.min(12,JM.box+4);f++){const m=OPENM[s2]+f,rel=((m-JM.k.t)%12+12)%12;if(JM.pent.includes(rel)){const hit=last&&last.m===m;out.push({s:s2,f,k:hit?'good':rel===0?'home':'note',t:DLAB[rel]})}}return out}
+function renderJam(){
+ const x=X(),el=$('fiveC');if(!JM)jamSetup();
+ el.innerHTML=head(x.ex.jam[0])+`<p class="muted">${x.jamHow(keyName(JM.k))}</p>
+ <div class="jam"><div class="jnow"><small>${x.paNow}</small><b id="jmC">${esc(cname(JM.cur||JM.ch[0]))}</b><small>${x.paNext}: <span id="jmN">${esc(cname(JM.ch[1%JM.ch.length]))}</span></small></div>
+ <div class="jtask"><small>${x.jamTaskL}</small><p id="jmT">${JCH()[JM.chal]}</p><div class="jfb" id="jmFb"></div></div></div>
+ <div class="fbwrap"><div class="fb" id="jmB"><svg></svg></div></div>
+ <div class="jheard" id="jmH"></div><div>${mhLink()}</div><div class="score" id="jmS">${x.jamScore(0,0,0)}</div>
+ <div class="row" style="margin-top:10px"><button class="${JM.on?'pri':'fire'} big1" id="jmGo">${JM.on?x.stopM:x.jamGo}</button><span class="muted">BPM</span><button class="sq" id="jmM">−</button><output id="jmBpm">${JM.bpm}</output><button class="sq" id="jmP">+</button></div>
+ <p class="t" style="margin-top:8px">${x.jamTip}</p>`;
+ bindHead();setBoard($('jmB'),{frets:12,marks:jamMarks(),box:[JM.box],lefty,horiz:true});
+ $('jmGo').onclick=()=>{if(JM.on){jamStop();renderJam()}else jamStart()};
+ $('jmM').onclick=()=>{JM.bpm=Math.max(50,JM.bpm-4);$('jmBpm').textContent=JM.bpm};$('jmP').onclick=()=>{JM.bpm=Math.min(140,JM.bpm+4);$('jmBpm').textContent=JM.bpm};
+ jamUI();
 }
 
 /* --- cards --- */
@@ -339,6 +385,7 @@ function renderProgress(){
  <div class="panel"><div class="lbl">${x.pRec}</div>${recs.length?recs.map(r=>`<div class="bar"><span>${pkName(r.k)}</span><div class="prog"><i style="width:${r.best/mx*100}%"></i></div><b>${r.best}</b></div>`).join(''):`<p class="t">${x.pNone}</p>`}</div>
  <div class="pgrid">
   <div class="panel stat"><span class="lbl">${x.pEar}</span><b>${en?Math.round(eo/en*100):0} %</b><small>${recent[1]?tr('7 dní','7 days')+': '+Math.round(recent[0]/recent[1]*100)+' %':x.pNone}</small></div>
+  <div class="panel stat"><span class="lbl">${x.ex.rhythm[0]}</span><b>${(()=>{const v=Object.values(rtHist);return v.length?Math.max(...v.map(h=>h.best)):'–'})()}</b><small>${(()=>{const e=Object.entries(rtHist).sort((a,b)=>b[1].best-a[1].best)[0];return e?(x.rtPats[e[0].split('@')[0]]||'')+' · '+e[0].split('@')[1]+' BPM':x.pNone})()}</small></div>
   <div class="panel stat"><span class="lbl">${x.pRep}</span><b>${rc[2]+rc[3]}</b><small>${x.rep1}: ${rc[1]} · ${x.rep3}: ${rc[3]}</small></div>
  </div>
  <div class="panel"><div class="lbl">${x.pMap} · ${x.pKnown(Math.round(mk/mn*100))}</div><div class="fbwrap"><div class="fb" id="pfb"><svg></svg></div></div><p class="t">${tr("Zelená = umíš jistě, žlutá = skoro, červená = ještě se učíš. Trénuj v cvičení Tóny na hmatníku.","Green = solid, yellow = almost, red = still learning. Practise in Notes on the fretboard.")}</p></div>`;

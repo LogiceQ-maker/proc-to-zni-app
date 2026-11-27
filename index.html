@@ -78,7 +78,7 @@
       <div class="tnote" id="tnote">–</div>
       <div class="thint" id="thint"></div>
       <div class="strs" id="strs"></div>
-      <div class="row" style="justify-content:center;margin-top:16px"><button class="fire" data-mic></button></div>
+      <div class="row" style="justify-content:center;margin-top:16px"><button class="fire" data-mic></button></div><div class="center" style="margin-top:6px"><button class="link mhlink light" data-mh="1" data-t="mhLink"></button></div>
       <p class="t micmsg" style="color:#cfe3d7;margin-top:8px"></p>
     </div>
     <div class="panel">
@@ -94,12 +94,13 @@
 <section id="v-more" hidden>
   <h1 class="vt" data-t="tMore"></h1>
   <div class="more">
+    <div class="panel fbp"><div><b data-t="fbT"></b><p class="t" data-t="fbSub"></p></div><div class="row"><button class="fire" id="fbOpen" data-t="fbBtn"></button><button id="micTestB" data-t="micTest"></button></div></div>
     <div class="panel met">
       <div class="lbl" data-t="metro"></div>
       <div class="big"><span id="bpm">80</span> <small>BPM</small></div>
       <div class="dots" id="dots"></div>
       <input type="range" id="br" min="40" max="220" value="80" aria-label="BPM">
-      <div class="row"><button class="sq" id="bm" aria-label="-">−</button><button class="pri" id="go"></button><button id="tap" data-t="tap"></button><button class="sq" id="bp" aria-label="+">+</button></div>
+      <div class="row"><button class="sq" id="bm" aria-label="-">−</button><button class="pri" id="go"></button><button class="sq" id="bp" aria-label="+">+</button></div>
       <div class="row" style="margin-top:10px;justify-content:center"><span class="muted" data-t="beats"></span><div class="seg" id="bt"><button data-b="2">2</button><button data-b="3">3</button><button data-b="4">4</button><button data-b="6">6</button></div></div>
     </div>
     <div class="panel set">
@@ -174,6 +175,22 @@
   <button class="link" id="obMicN" data-t="micLater"></button>
 </div></div>
 
+<div class="ov" id="fbOv" hidden><div class="box" role="dialog" aria-modal="true">
+  <div class="row" style="justify-content:space-between"><h2 data-t="fbT"></h2><button id="fbX" aria-label="×">✕</button></div>
+  <div class="chips" id="fbKind"></div>
+  <textarea id="fbTx" rows="5"></textarea>
+  <p class="t" data-t="fbHint"></p>
+  <div class="row" style="margin-top:10px"><button class="fire" id="fbSend" data-t="fbSend"></button><button id="fbCopy" data-t="fbCopy"></button></div>
+  <p class="t" id="fbMsg"></p>
+</div></div>
+<div class="ov" id="micOv" hidden><div class="box" role="dialog" aria-modal="true">
+  <div class="row" style="justify-content:space-between"><h2 data-t="mhT"></h2><button id="mhX" aria-label="×">✕</button></div>
+  <div class="mhlive"><div class="mhbar"><i id="mhLvl"></i></div><div class="mhnote" id="mhNote">–</div></div>
+  <p class="t center" id="mhState"></p>
+  <ol class="mhtips" id="mhTips"></ol>
+  <button class="fire big1" id="mhOk" data-t="mhOk"></button>
+</div></div>
+
 <script src="js/core.js"></script>
 <script src="js/i18n.js"></script>
 <script src="js/chords.js"></script>
@@ -181,6 +198,8 @@
 <script src="js/song.js"></script>
 <script src="js/train.js"></script>
 <script src="js/quest.js"></script>
+<script src="js/help.js"></script>
+<script src="js/rhythm.js"></script>
 <script src="js/tuner.js"></script>
 <script src="js/main.js"></script>
 </body>

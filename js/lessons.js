@@ -3,7 +3,7 @@
 const recLes=()=>({beg:0,mid:0,adv:7})[level||'beg'];
 const knowIt=(i,id)=>(level==='adv'&&i<7)||(level==='mid'&&id==='minor');
 let les=store.get('pcz-les',null);
-const CHAPTERS=[['Domov a napětí','Home and tension'],['Z čeho je hudba','What music is made of'],['Sólo a uši','Solos and ears']];
+const CHAPTERS=[['Domov a napětí','Home and tension'],['Z čeho je hudba','What music is made of'],['Sólo a uši','Solos and ears'],['Improvizace','Improvisation']];
 const triadNames=(r,ts)=>ts.map(t=>nn(r+t)).join(' ');
 function lessons(){
  const {k,us}=A;if(!k)return [];
@@ -20,6 +20,7 @@ function lessons(){
  const bor=k.minor?{c:V,why:tr(`${n(V)} (durová pětka místo mollové)`,`${n(V)} (a major five instead of minor)`)}:{c:C(10,'M'),why:tr(`${n(C(10,'M'))} (rockový host bVII)`,`${n(C(10,'M'))} (the rock guest bVII)`)};
  const borIn=us.find(u=>!NATIDS[k.minor?'min':'maj'].includes(role(u,k).id)&&role(u,k).iv!==0);
  const arp=c=>{const r=40+((c.root-4+12)%12);return tones(c).map(t=>r+12+t).concat(r+24)};
+ const IP=k.minor?[0,3,5,7,10,12]:[0,2,4,7,9,12],ib=52+((k.t-4+12)%12);
  const relProg=[C0(Mr,'M'),C0(Mr+5,'M'),C0(Mr+7,'M'),C0(Mr,'M')],relProgM=[C0(mr,'m'),C0(mr+5,'m'),C0(mr+7,'M'),C0(mr,'m')];
  return [
  {id:'home',ch:0,t:tr('Domov','Home'),b:tr(`Každá písnička má jeden akord, kde je doma. Tam většinou začíná a skoro vždy končí. V písničce ${song} je domov <b>${n(I)}</b>.`,`Every song has one chord where it feels at home. It usually starts there and almost always ends there. In ${song} home is <b>${n(I)}</b>.`),
@@ -71,12 +72,29 @@ function lessons(){
  {id:'borrowed',ch:2,t:tr('Vypůjčené akordy','Borrowed chords'),b:tr(`Některé akordy do tóniny nepatří, písnička si je půjčí kvůli barvě. V tónině ${key} je typický ${bor.why}.`+(borIn?` Ve tvé písničce je takový host <b>${n(borIn)}</b>.`:''),`Some chords don’t belong to the key, the song borrows them for colour. In ${key} a typical one is ${bor.why}.`+(borIn?` Your song has such a guest: <b>${n(borIn)}</b>.`:'')),
   e:k.minor?[[tr('▶ S vypůjčeným','▶ With the borrowed one'),[I,IV,V,I]],[tr('▶ Bez něj','▶ Without it'),[I,IV,C(7,'m'),I]]]:[[tr('▶ S vypůjčeným','▶ With the borrowed one'),[I,C(10,'M'),IV,I]],[tr('▶ Bez něj','▶ Without it'),[I,V,IV,I]]],en:tr('Vypůjčený akord dodá šťávu, ale písnička zůstane doma.','The borrowed chord adds flavour, but the song stays home.'),
   task:tr('Projdi své písničky v Rozboru a najdi akord označený jako „Host“ nebo „Vypůjčený“.','Go through your songs in Analysis and find a chord marked “Guest” or “Borrowed”.'),
-  q:tr(`Který akord v ${key} je vypůjčený?`,`Which chord in ${key} is borrowed?`),o:[n(bor.c),n(IV),n(VI)],ok:0,w:bor.why}
+  q:tr(`Který akord v ${key} je vypůjčený?`,`Which chord in ${key} is borrowed?`),o:[n(bor.c),n(IV),n(VI)],ok:0,w:bor.why},
+ {id:'imp1',ch:3,t:tr('Improvizace: tři tóny stačí','Improvising: three notes are enough'),b:tr(`Improvizace není hraní stovky tónů. Začni jen se třemi tóny z pentatoniky: <b>${IP.slice(0,3).map(x=>nn(k.t+x)).join(' ')}</b>. Když máš málo tónů, začneš si hrát s rytmem a z toho vzniká hudba.`,`Improvising isn’t playing a hundred notes. Start with just three pentatonic notes: <b>${IP.slice(0,3).map(x=>nn(k.t+x)).join(' ')}</b>. With few notes you start playing with rhythm, and that’s where music happens.`),
+  e:[[tr('▶ Melodie ze 3 tónů','▶ A 3-note tune'),[0,1,2,1,0,2,1,0].map(i=>ib+IP[i]),{notes:true,step:.32}],[tr('▶ Stejné tóny, jiný rytmus','▶ Same notes, new rhythm'),[0,0,1,2,2,1,0].map(i=>ib+IP[i]),{notes:true,step:.22}]],en:tr('Pořád jen tři tóny, a přitom to zní pokaždé jinak.','Still just three notes, and it sounds different every time.'),
+  taskBeg:tr(`Zahraj ${IP.slice(0,3).map(x=>nn(k.t+x)).join(', ')} pořád dokola, pomalu. Pak měň pořadí a délku tónů.`,`Play ${IP.slice(0,3).map(x=>nn(k.t+x)).join(', ')} over and over, slowly. Then change the order and length of the notes.`),
+  task:tr(`Pusť si 5 minut → Hraj s doprovodem a celou minutu improvizuj jen s těmi třemi tóny.`,`Start 5 minutes → Play along and improvise for a whole minute with only those three notes.`),
+  q:tr('Kolik tónů stačí na první improvizaci?','How many notes do you need for your first improvisation?'),o:tr(['Tři','Všech dvanáct','Celá stupnice a ještě víc'],['Three','All twelve','The whole scale and more']),ok:0,w:tr('Míň tónů = víc hudby. Rytmus je důležitější než počet tónů.','Fewer notes = more music. Rhythm matters more than how many notes.')},
+ {id:'imp2',ch:3,t:tr('Otázka a odpověď','Question and answer'),b:tr(`Dobrá sóla si povídají. První fráze je <b>otázka</b>: skončí jinde než doma, třeba na ${nn(k.t+7)}, a visí ve vzduchu. Druhá je <b>odpověď</b>: skončí doma na <b>${nn(k.t)}</b> a uzavře to.`,`Good solos have a conversation. The first phrase is a <b>question</b>: it ends somewhere other than home, like ${nn(k.t+7)}, and hangs in the air. The second is the <b>answer</b>: it ends home on <b>${nn(k.t)}</b> and closes it.`),
+  e:[[tr('▶ Otázka','▶ Question'),[0,1,2,3].map(i=>ib+IP[i]),{notes:true,step:.34}],[tr('▶ Odpověď','▶ Answer'),[3,2,1,0].map(i=>ib+IP[i]),{notes:true,step:.34}],[tr('▶ Celý rozhovor','▶ The whole conversation'),[0,1,2,3,3,2,1,0].map(i=>ib+IP[i]),{notes:true,step:.34}]],en:tr('Otázka nechává napětí, odpověď ho uvolní. Stejně jako akordy V → I.','The question leaves tension, the answer releases it. Just like the chords V → I.'),
+  task:tr(`Zahraj krátkou frázi, která skončí na ${nn(k.t+7)}. Pak skoro stejnou, která skončí na ${nn(k.t)}. Opakuj s různými rytmy.`,`Play a short phrase ending on ${nn(k.t+7)}. Then an almost identical one ending on ${nn(k.t)}. Repeat with different rhythms.`),
+  q:tr('Na kterém tónu zní fráze jako odpověď (uzavřeně)?','Which note makes a phrase sound like an answer (finished)?'),o:[nn(k.t),nn(k.t+7),nn(k.t+IP[4])],ok:0,w:tr(`Na domově ${nn(k.t)}. Ostatní tóny nechávají otázku otevřenou.`,`On home, ${nn(k.t)}. Other notes leave the question open.`)},
+ {id:'imp3',ch:3,t:tr('Cílové tóny','Target notes'),b:tr(`Profíci nehrají náhodně, ale <b>míří</b>: když se změní akord, přistanou na jeho tónu. Nad ${n(I)} je nejjistější ${nn(I.root)}, nad ${n(V)} je to ${nn(V.root)}. Mezi tím si hraj, ale na změně akordu přistaň.`,`Pros don’t play randomly, they <b>aim</b>: when the chord changes, they land on one of its notes. Over ${n(I)} the safest is ${nn(I.root)}, over ${n(V)} it’s ${nn(V.root)}. Play freely in between, but land on the change.`),
+  e:[[tr('▶ Přistání na tónu akordu','▶ Landing on a chord note'),[I,V,I],{step:1.1}],[tr('▶ Cílové tóny','▶ The target notes'),[ib,ib+7,ib],{notes:true,step:1.1}]],en:tr('Když melodie trefí tón akordu, zní to „správně“ a sebejistě.','When the melody hits a chord note, it sounds “right” and confident.'),
+  task:tr(`Pusť si doprovod. Kdykoli přijde ${n(I)}, zahraj ${nn(I.root)}. Kdykoli přijde ${n(V)}, zahraj ${nn(V.root)}. Mezi tím cokoli z pentatoniky.`,`Start the play-along. Whenever ${n(I)} comes, play ${nn(I.root)}. Whenever ${n(V)} comes, play ${nn(V.root)}. Anything from the pentatonic in between.`),
+  q:tr(`Hraje akord ${n(V)}. Na který tón je nejlepší přistát?`,`The ${n(V)} chord is playing. Which note is best to land on?`),o:[nn(V.root),nn(V.root+1),nn(V.root+6)],ok:0,w:tr(`${nn(V.root)} je základ akordu ${n(V)}, takže sedí stoprocentně.`,`${nn(V.root)} is the root of ${n(V)}, so it fits perfectly.`)},
+ {id:'imp4',ch:3,t:tr('Pauzy a motivy','Rests and motifs'),b:tr('Nejčastější chyba je hrát bez přestávky. <b>Pauza je taky hudba.</b> Vymysli krátký motiv (3–4 tóny), zahraj ho, nech chvilku ticho a zopakuj ho. Pak ho trochu změň. Tak se staví celá sóla.','The most common mistake is playing nonstop. <b>A rest is music too.</b> Make a short motif (3–4 notes), play it, leave a moment of silence, repeat it. Then change it a little. That’s how whole solos are built.'),
+  e:[[tr('▶ Bez pauz','▶ No rests'),[0,1,2,3,2,1,0,1,2,3,4,3,2,1,0].map(i=>ib+IP[i]),{notes:true,step:.16}],[tr('▶ Motiv s pauzami','▶ Motif with rests'),[0,1,2,null,0,1,2,null,0,1,3,2,0].map(i=>i==null?null:ib+IP[i]).filter(v=>v!=null),{notes:true,step:.3}]],en:tr('Druhá ukázka má míň tónů, a přitom se líp poslouchá.','The second one has fewer notes, yet it’s much nicer to listen to.'),
+  task:tr('Vymysli motiv ze 3 tónů. Zahraj ho 4× za sebou s pauzou mezi. Napočtvrté změň poslední tón.','Make a 3-note motif. Play it 4 times with rests in between. The fourth time, change the last note.'),
+  q:tr('Co nejvíc pomůže, aby improvizace zněla jako hudba?','What helps an improvisation sound like music the most?'),o:tr(['Pauzy a opakování motivu','Hrát co nejrychleji','Používat co nejvíc tónů'],['Rests and repeating a motif','Playing as fast as possible','Using as many notes as possible']),ok:0,w:tr('Posluchač potřebuje něco poznat. Opakování a ticho mu to dají.','The listener needs something to recognise. Repetition and silence give them that.')}
  ];
 }
 let lstep=0,lAns=null;
 const LSTEPS=['idea','listen','play','quiz','done'];
-function partOf(i){return i<6?0:1}
+function partOf(i){return i<6?0:i<12?1:2}
 function renderLes(){
  regN=Math.max(regN,500);analyze();const L=lessons(),x=X();$('lesSong').textContent=x.lesOn(curSong().name||'—');
  if(!L.length){$('lpath').innerHTML='';$('lbar').innerHTML='';$('lesson').innerHTML=`<p class="empty">${x.empty}</p>`;return}
@@ -94,7 +112,7 @@ function renderLes(){
  if(st==='play')body=`<div class="lbl">🎸 ${x.taskL}</div><h2>${l.t}</h2><p class="body big">${PL()==='beg'&&l.taskBeg?l.taskBeg:l.task}</p>`;
  if(st==='quiz'){const rot=((curSong().name||'').length+les)%l.o.length,ord=l.o.map((v,i)=>(i+rot)%l.o.length);
   body=`<div class="lbl">❓ ${x.quizL}</div><p class="qq">${l.q}</p><div class="opts">${ord.map(i=>`<button data-ok="${i===l.ok?1:0}" data-oi="${i}" class="${lAns==null?'':i===l.ok&&lAns===l.ok?'ok':i===lAns?'no':''}">${l.o[i]}</button>`).join('')}</div><p class="qfb" id="qfb">${lAns==null?'':lAns===l.ok?x.right+' '+l.w:x.wrong}</p>`}
- if(st==='done'){const nx=les<L.length-1?L[les+1]:null;body=`<div class="donebox"><div class="big">🎉</div><h2>${x.lesDone(l.t)}</h2><p class="body">${x.lesDoneSub}</p>${nx?`<p class="t">${x.nextIs(nx.t)}</p>`:`<p class="t">${x.allDone}</p>`}</div>`}
+ if(st==='done'){const nx=les<L.length-1?L[les+1]:null;body=`<div class="donebox"><div class="big">🎉</div><h2>${x.lesDone(l.t)}</h2><p class="body">${x.lesDoneSub}</p>${nx?`<p class="t">${x.nextIs(nx.t)}</p>`:`<p class="t">${x.lesAllDone}</p>`}</div>`}
  $('lesson').innerHTML=prog+`<div class="lcard">${body}</div>`;
  const canNext=st!=='quiz'||lAns===l.ok;
  $('lbar').innerHTML=st==='done'
@@ -145,5 +163,8 @@ function cardQ(id){
  if(id==='relative'){const k=keyQ(false);return mk(k,()=>({q:tr(`Paralelní moll k ${nn(k.t)} dur je…`,`The relative minor of ${nn(k.t)} major is…`),o:[nn(k.t+9),nn(k.t+4),nn(k.t+2)].map(s=>s+' '+x.minor),ok:0,w:tr('Tři půltóny pod domovem.','Three half steps below home.')}))}
  if(id==='keyfind'){const k=keyQ(false);return mk(k,()=>{const cs=[C0(k.t,'M'),C0(k.t+9,'m'),C0(k.t+5,'M'),C0(k.t+7,'M'),C0(k.t,'M')];return {q:tr(`Akordy ${cs.map(c=>cname(c)).join(' ')}. Jaká je tónina?`,`Chords ${cs.map(c=>cname(c)).join(' ')}. What’s the key?`),o:[keyName(k),keyName({t:(k.t+9)%12,minor:true}),keyName({t:(k.t+5)%12,minor:false})],ok:0,w:tr('Začíná i končí na něm.','It starts and ends there.')}})}
  if(id==='borrowed'){const k=keyQ(false);return mk(k,()=>({q:tr(`Který akord v ${keyName(k)} je vypůjčený?`,`Which chord in ${keyName(k)} is borrowed?`),o:[cname(C0(k.t+10,'M')),cname(C0(k.t+5,'M')),cname(C0(k.t+9,'m'))],ok:0,w:tr(`${cname(C0(k.t+10,'M'))} je bVII, rockový host z moll.`,`${cname(C0(k.t+10,'M'))} is bVII, the rock guest from minor.`)}))}
+ if(id==='imp1'||id==='imp4'){return rnd([{q:tr('Co pomůže improvizaci nejvíc?','What helps improvisation the most?'),o:tr(['Pauzy a opakovaný motiv','Rychlost','Co nejvíc tónů'],['Rests and a repeated motif','Speed','As many notes as possible']),ok:0,w:tr('Méně je více.','Less is more.')},{q:tr('S kolika tóny začít improvizovat?','How many notes to start improvising with?'),o:tr(['3','12','7'],['3','12','7']),ok:0,w:tr('Tři tóny z pentatoniky stačí.','Three pentatonic notes are enough.')}])}
+ if(id==='imp2'){const k=keyQ(Math.random()<.5);return mk(k,()=>({q:tr(`${keyName(k)}: na kterém tónu fráze zní jako odpověď?`,`${keyName(k)}: which note makes a phrase sound like an answer?`),o:[nn(k.t),nn(k.t+7),nn(k.t+(k.minor?10:9))],ok:0,w:tr('Na domově.','On home.')}))}
+ if(id==='imp3'){const k=keyQ(false),c=rnd([C0(k.t+7,'M'),C0(k.t+5,'M'),C0(k.t,'M')]);return mk(k,()=>({q:tr(`Hraje ${cname(c)}. Kam nejlépe přistát?`,`${cname(c)} is playing. Where is it best to land?`),o:[nn(c.root),nn(c.root+1),nn(c.root+6)],ok:0,w:tr('Na základu akordu.','On the chord’s root.')}))}
  return null;
 }

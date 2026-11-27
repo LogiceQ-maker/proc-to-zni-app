@@ -436,3 +436,42 @@ input,textarea,select,#sq{font-size:16px}
 @media(min-width:900px){.lbar.static{bottom:0;margin:14px 0 0;padding:12px 0}}
 .qn:not(.cur) small{display:none}.qn{padding:8px 12px}.qn:not(.cur) b{font-size:16px}.qn .qi{width:30px;height:30px}
 @media(max-width:520px){.pbar>button{font-size:14px;padding:0 4px}}
+.jam{display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr);gap:10px;margin:10px 0}
+.jnow,.jtask{background:var(--panel);border-radius:14px;padding:10px 12px;position:relative}
+.jnow small,.jtask small{display:block;color:var(--mut);font-size:13px}
+.jnow b{display:block;font:700 44px/1.05 "Barlow Condensed",sans-serif;color:var(--fireInk)}
+.jtask p{margin:2px 0 0;font-size:16px;font-weight:600;line-height:1.3}
+.jfb{position:absolute;right:10px;top:8px;font-weight:700;color:#1f9d5c;opacity:0}.jfb.pop{animation:jp 1.2s}
+@keyframes jp{0%{opacity:0;transform:translateY(6px)}15%{opacity:1;transform:none}80%{opacity:1}100%{opacity:0}}
+.jheard{display:flex;gap:6px;flex-wrap:wrap;min-height:34px;margin-top:8px}
+.jheard span{padding:4px 10px;border-radius:999px;font-weight:700;color:#fff}.jheard .jp{background:#1f9d5c}.jheard .js{background:#e8b031;color:#3a2318}.jheard .jx{background:var(--bad)}
+/* help */
+.fbp{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;border:2px solid var(--fire)}
+.fbp b{font-size:18px}.fbp .row{gap:8px}
+#fbTx{margin-top:10px;min-height:110px;font-size:16px}
+.mhlive{display:flex;align-items:center;gap:14px;margin:10px 0}
+.mhbar{flex:1;height:22px;border-radius:11px;background:var(--line);overflow:hidden}.mhbar i{display:block;height:100%;width:0;background:#1f9d5c;transition:width .08s}.mhbar i.lo{background:#e8b031}.mhbar i.hi{background:var(--bad)}
+.mhnote{font:700 40px "Barlow Condensed",sans-serif;min-width:56px;text-align:center}
+.mhtips{padding-left:20px;display:grid;gap:6px;font-size:15px}
+.mhlink{font-size:14px;color:var(--mut);text-decoration:underline;background:none;border:0;min-height:30px;padding:0 4px}.mhlink.light{color:#cfe3d7}
+.center{text-align:center}
+.tipc{display:flex;gap:10px;align-items:flex-start;background:color-mix(in srgb,#f5b301 16%,var(--bg));border-radius:14px;padding:10px 12px;margin:10px 0 0}
+.tipc p{margin:0;flex:1;font-size:15px;line-height:1.4}.tipi{font-size:20px}.tipx{min-height:30px;min-width:30px;padding:0;border:0;background:none;color:var(--mut)}
+/* rhythm */
+.rtcnt{font:700 64px "Barlow Condensed",sans-serif;text-align:center;line-height:1}
+.rtlane{position:relative;height:56px;border-radius:14px;background:var(--panel);margin:14px 0 6px;overflow:hidden}
+.rtlane .mid,.rtplot .mid{position:absolute;left:50%;top:6px;bottom:6px;width:3px;margin-left:-1.5px;background:var(--leaf);border-radius:2px}
+.rtlane .l,.rtlane .r{position:absolute;bottom:4px;font-size:12px;color:var(--mut)}.rtlane .l{left:10px}.rtlane .r{right:10px}
+.rtlane i{position:absolute;top:50%;width:18px;height:18px;margin:-9px 0 0 -9px;border-radius:50%;transition:opacity 2s ease-in,transform .2s}
+.rtlane i.fade{opacity:0}.rtlane i.ok,.rtplot i.ok{background:#1f9d5c}.rtlane i.mid,.rtplot i.mid{background:#e8b031}.rtlane i.bad,.rtplot i.bad{background:var(--bad)}
+.rtnow{text-align:center;font:700 26px "Barlow Condensed",sans-serif;min-height:34px;margin:4px 0}.rtnow.ok{color:#1f9d5c}.rtnow.mid{color:#c48a06}.rtnow.bad{color:var(--bad)}
+.rtcal{text-align:center;padding:30px 0}.rtcal .big{font-size:56px}
+.rtres{text-align:center}.rtres .big{font:700 72px/1 "Barlow Condensed",sans-serif}.rtres .big small{font-size:24px;color:var(--mut)}
+.rtplot{position:relative;height:120px;border-radius:14px;background:var(--panel);margin:10px 0}
+.rtplot .mid{left:0;right:0;top:50%;bottom:auto;width:auto;height:2px;margin:0}
+.rtplot i{position:absolute;width:9px;height:9px;margin:-4.5px 0 0 -2px;border-radius:50%}
+.rtplot .l,.rtplot .r2{position:absolute;left:8px;font-size:11px;color:var(--mut)}.rtplot .l{bottom:4px}.rtplot .r2{top:4px}
+#fbOv .row,#micOv .row,#lesOv .row{flex-wrap:nowrap;align-items:flex-start}#fbOv h2,#micOv h2,#lesOv h2{margin:0;flex:1}
+.welcome{padding:12px 14px}.welcome .wrow{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.welcome .wrow b{font:700 22px "Barlow Condensed",sans-serif}
+.welcome .fire{min-height:44px;font-size:16px;padding:0 16px}.welcome details{margin-top:6px}.welcome summary{cursor:pointer;color:var(--mut);font-size:14px;min-height:30px;display:flex;align-items:center}
+.welcome ol{margin:6px 0 0}

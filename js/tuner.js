@@ -14,7 +14,7 @@ function renderTuner(){
  if(!$('ticks').innerHTML){let h='';for(let c=-50;c<=50;c+=10){const a=(c/50)*60*Math.PI/180,r1=c%50?112:106,r2=124;h+=`<line x1="${150+r1*Math.sin(a)}" y1="${150-r1*Math.cos(a)}" x2="${150+r2*Math.sin(a)}" y2="${150-r2*Math.cos(a)}" stroke="#ffffff70" stroke-width="2"/>`}$('ticks').innerHTML=h}
  micUI();if(!Mic.on){$('v-tuner').classList.remove('intune','hold');$('tnote').textContent='–';$('thint').textContent='';$('thint').className='thint';$('needle').style.transform='rotate(0deg)'}
 }
-let tOk=0,tLast=0,tNeed=0;
+let tOk=0,tLast=0,tNeed=0,tJump=[];
 function tunerHear(p){
  const th=$('thint'),x=X(),tv=$('v-tuner');
  if(!p||p.clar<0.75){tQ++;
@@ -22,7 +22,12 @@ function tunerHear(p){
   if(tQ===8)tv.classList.add('hold');
   if(tQ>55){th.textContent=x.quiet;th.className='thint';tv.classList.remove('intune','hold');$('needle').style.transform='rotate(0deg)';tOk=0}
   tSm=[];return}
- tQ=0;tv.classList.remove('hold');
+ const fresh=tQ>=3||p.onset;tQ=0;tv.classList.remove('hold');
+ // stability: a new pluck (after silence or a clear attack) may change the note at once,
+ // but while a string rings, a sudden jump (overtone, octave slip) must last 4 readings to count
+ if(fresh){tSm=[];tJump=[]}
+ if(tSm.length>=3){const so0=[...tSm].sort((a,b)=>a-b),cur=so0[so0.length>>1];
+  if(Math.abs(p.midi-cur)>.6){tJump.push(p.midi);if(tJump.length<4)return;const j=[...tJump].sort((a,b)=>a-b);if(j[3]-j[0]>.5){tJump.shift();return}tSm=tJump.slice();tJump=[]}else tJump=[]}
  tSm.push(p.midi);if(tSm.length>7)tSm.shift();const so=[...tSm].sort((a,b)=>a-b),mid=so.length>>1,m=so.length>=3?(so[mid-1]+so[mid]+so[mid+1])/3:so[mid];
  let tg=null;const ts=tunTargets();
  if(tLock!=null&&!$('tauto').checked)tg=ts[tLock];else{let bd=99;for(const t of ts){const d=Math.abs(m-t.m);if(d<bd){bd=d;tg=t}}if(tLock!=null&&$('tauto').checked&&Math.abs(m-ts[tLock].m)<1.5)tg=ts[tLock]}
@@ -38,7 +43,7 @@ function tunerHear(p){
  if(shown&&tOk===3&&navigator.vibrate)navigator.vibrate(40);
  document.querySelectorAll('#strs button').forEach(b=>{b.classList.toggle('near',+b.dataset.ti===tg.i);if(shown&&+b.dataset.ti===tg.i)b.classList.add('done')});
 }
-function setMicCb(){Mic.minHz=view==='tuner'?Math.max(25,440*2**((Math.min(...tunTargets().map(t=>t.m))-69)/12)*.8):70;Mic.cb=view==='tuner'?tunerHear:(view==='five'&&FV.scr==='notesEx'&&EX?exHear:view==='five'&&FV.scr==='quest'&&Q?qHear:null)}
+function setMicCb(){Mic.minHz=view==='tuner'?Math.max(25,440*2**((Math.min(...tunTargets().map(t=>t.m))-69)/12)*.8):70;Mic.cb=view==='tuner'?tunerHear:(view==='five'&&FV.scr==='notesEx'&&EX?exHear:view==='five'&&FV.scr==='quest'&&Q?qHear:view==='five'&&FV.scr==='jam'&&JM&&JM.on?jamHear:null)}
 document.addEventListener('DOMContentLoaded',()=>{
  $('tuning').onchange=e=>{tuningId=e.target.value;store.set('pcz-tuning',tuningId);tLock=null;renderTuner();setMicCb()};
  $('strs').onclick=e=>{const b=e.target.closest('[data-ti]');if(!b)return;const i=+b.dataset.ti;tLock=tLock===i?null:i;if($('tref').checked)pling(curTun().m[i]);renderTuner()};

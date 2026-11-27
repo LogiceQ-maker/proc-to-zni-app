@@ -49,7 +49,7 @@ document.addEventListener('DOMContentLoaded',()=>{
  $('go').onclick=()=>{if(timer){clearInterval(timer);timer=null;$('go').textContent=X().start;document.querySelectorAll('.dot').forEach(d=>d.classList.remove('hit'));return}try{actx();nextT=ac.currentTime+.06;beat=0;timer=setInterval(mtick,25);$('go').textContent=X().stopM}catch(e){}};
  $('br').oninput=e=>setB(+e.target.value);$('bm').onclick=()=>setB(bpm-1);$('bp').onclick=()=>setB(bpm+1);
  $('bt').onclick=e=>{const b=e.target.closest('button');if(b){beats=+b.dataset.b;beat=0;dots()}};
- $('tap').onclick=()=>{const n=performance.now();taps=taps.filter(t=>n-t<2500);taps.push(n);if(taps.length>1)setB(60000/((taps[taps.length-1]-taps[0])/(taps.length-1)))};
+
  $('lang').onclick=e=>{const b=e.target.closest('button');if(b)setLang(b.dataset.l)};
  $('notn').onclick=e=>{const b=e.target.closest('button');if(!b)return;cz=b.dataset.n==='h';store.set('pcz-cz',cz);refresh()};
  $('lvls').onclick=e=>{const b=e.target.closest('[data-lvl]');if(!b)return;level=b.dataset.lvl;store.set('pcz-level',level);refresh()};

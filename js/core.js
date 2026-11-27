@@ -8,7 +8,7 @@ let playLvl=store.get('pcz-play',null);const PL=()=>playLvl||'mid';
 let cz=store.get('pcz-cz',lang==='cs'),level=store.get('pcz-level',null),mine=store.get('pcz-songs',[]),done=store.get('pcz-done2',[]);
 let stats=store.get('pcz-stats',{}),plog=store.get('pcz-log',{}),stage=store.get('pcz-stage',1),lefty=store.get('pcz-lefty',false),tuningId=store.get('pcz-tuning','std');
 let rep=store.get('pcz-rep',{}),cards=store.get('pcz-cards',{}),chRec=store.get('pcz-ch',{}),ytLoops=store.get('pcz-yt',{}),planDone=store.get('pcz-plan',{});
-let cur=store.get('pcz-cur','x1'),shift=0,selIdx=0,mode='pent',lab='name',view='song',sub='play',sample=null,activeTrain=null;
+let cur=store.get('pcz-cur','l1'),shift=0,selIdx=0,mode='pent',lab='name',view='song',sub='play',sample=null,activeTrain=null;
 const tr=(c,e)=>lang==='cs'?c:e;
 const X=()=>S[lang];
 const dkey=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
@@ -18,7 +18,66 @@ const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
 const shuffle=a=>{for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a};
 const uniq=a=>[...new Set(a)];
 
-const EXAMPLES=[{id:'x1',name:'Sultans of Swing',text:'Dm C Bb A\nDm C Bb A\nF C Bb Dm'},{id:'x2',name:'Hit the Road Jack',text:'Am G F E'},{id:'x3',name:'Let It Be',text:'C G Am F\nC G F C'},{id:'x4',name:"Knockin' on Heaven's Door",text:'G D Am\nG D C'},{id:'x5',name:'Stand by Me',text:'A F#m D E A'}];
+const FOLK=[
+ {id:'l1',name:'Holka modrooká (lidová)',text:`G
+Holka modrooká,
+     D7
+nesedávej u potoka,
+G
+holka modrooká,
+D7         G
+nesedávej tam.
+
+G
+V potoce je hastrmánek,
+D7
+zatahá tě za copánek,
+G
+holka modrooká,
+D7         G
+nesedávej tam.`},
+ {id:'l2',name:'Skákal pes (lidová)',text:`C              G7
+Skákal pes přes oves,
+               C
+přes zelenou louku,
+C              G7
+šel za ním myslivec,
+               C
+péro na klobouku.
+
+F              C
+Pejsku náš, co děláš,
+G7            C
+žes tak vesel stále?
+F              C
+Řek bych vám, nevím sám,
+G7            C
+hop a skákal dále.`},
+ {id:'l3',name:'Pec nám spadla (lidová)',text:`C               G7
+Pec nám spadla, pec nám spadla,
+                 C
+kdopak nám ji postaví?
+C                 G7
+Starý pecař není doma
+                C
+a mladý to neumí.`},
+ {id:'l4',name:'Kočka leze dírou (lidová)',text:`D            A7
+Kočka leze dírou,
+             D
+pes oknem, pes oknem,
+D               A7
+nebude-li pršet,
+             D
+nezmoknem, nezmoknem.`},
+ {id:'l5',name:'Amazing Grace (traditional)',text:`G              C        G
+Amazing grace! How sweet the sound
+                     D
+That saved a wretch like me!
+G                C       G
+I once was lost, but now am found,
+    Em       D       G
+Was blind, but now I see.`}];
+const EXAMPLES=FOLK.concat([{id:'x1',name:'Sultans of Swing',text:'Dm C Bb A\nDm C Bb A\nF C Bb Dm'},{id:'x2',name:'Hit the Road Jack',text:'Am G F E'},{id:'x3',name:'Let It Be',text:'C G Am F\nC G F C'},{id:'x4',name:"Knockin' on Heaven's Door",text:'G D Am\nG D C'},{id:'x5',name:'Stand by Me',text:'A F#m D E A'}]);
 function songs(){return EXAMPLES.concat(mine)}
 function curSong(){return songs().find(s=>s.id===cur)||EXAMPLES[0]}
 
@@ -186,18 +245,18 @@ async function micStart(){
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){micMsg(X().micNA);return false}
  try{clearTimeout(micKeep);const st=await getMicStream();
   actx();if(ac.state!=='running')try{await ac.resume()}catch(e){}
-  Mic.src=ac.createMediaStreamSource(st);Mic.an=ac.createAnalyser();Mic.an.fftSize=8192;Mic.src.connect(Mic.an);Mic.buf=new Float32Array(Mic.an.fftSize);Mic.on=true;Mic.t=setInterval(micTick,50);micUI();return true}
+  Mic.src=ac.createMediaStreamSource(st);Mic.an=ac.createAnalyser();Mic.an.fftSize=8192;Mic.src.connect(Mic.an);Mic.an2=ac.createAnalyser();Mic.an2.fftSize=4096;Mic.an2.smoothingTimeConstant=0;Mic.src.connect(Mic.an2);Mic.buf=new Float32Array(Mic.an.fftSize);Mic.on=true;Mic.t=setInterval(micTick,40);micUI();return true}
  catch(e){micMsg(e&&(e.name==='NotAllowedError'||e.name==='SecurityError')?X().micDenied:X().micNA);return false}
 }
 function micRelease(){try{if(Mic.stream)Mic.stream.getTracks().forEach(t=>t.stop())}catch(e){}Mic.stream=null;aSess('playback')}
 function micStop(){if(!Mic.on)return;clearInterval(Mic.t);try{Mic.src.disconnect()}catch(e){}Mic.on=false;micUI();clearTimeout(micKeep);micKeep=setTimeout(()=>{if(!Mic.on)micRelease()},90000)}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&!Mic.on)micRelease()});
 function micTick(){Mic.an.getFloatTimeDomainData(Mic.buf);
- if(Mic.ccb){let r=0;const b=Mic.buf;for(let i=b.length-2048;i<b.length;i++)r+=b[i]*b[i];r=Math.sqrt(r/2048);const pr=Mic.crms||0;Mic.crms=r;Mic.ccb(chroma(),r,r>pr*1.6&&r>0.004);return}
+ if(Mic.ccb){let r=0;const b=Mic.buf;for(let i=b.length-2048;i<b.length;i++)r+=b[i]*b[i];r=Math.sqrt(r/2048);const pr=Mic.crms||0;Mic.crms=r;Mic.ccb(chroma(Mic.fast?Mic.an2:Mic.an),r,r>pr*1.6&&r>0.004);return}
  const p=pitch(Mic.buf,ac.sampleRate,Mic.minHz);if(Mic.cb)Mic.cb(p)}
 /* ---------- chord hearing: which of the 12 notes are sounding ---------- */
-function chroma(){
- const an=Mic.an;if(!Mic.fb||Mic.fb.length!==an.frequencyBinCount)Mic.fb=new Float32Array(an.frequencyBinCount);
+function chroma(an){
+ an=an||Mic.an;if(!Mic.fb||Mic.fb.length!==an.frequencyBinCount)Mic.fb=new Float32Array(an.frequencyBinCount);
  const fb=Mic.fb;an.getFloatFrequencyData(fb);const bin=ac.sampleRate/an.fftSize,ch=new Float32Array(12);
  const lo=Math.ceil(72/bin),hi=Math.min(fb.length-2,Math.floor(1300/bin));let mx=-200;for(let i=lo;i<=hi;i++)if(fb[i]>mx)mx=fb[i];
  const pk=[];
