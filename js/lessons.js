@@ -74,28 +74,49 @@ function lessons(){
   q:tr(`Který akord v ${key} je vypůjčený?`,`Which chord in ${key} is borrowed?`),o:[n(bor.c),n(IV),n(VI)],ok:0,w:bor.why}
  ];
 }
+let lstep=0,lAns=null;
+const LSTEPS=['idea','listen','play','quiz','done'];
+function partOf(i){return i<6?0:1}
 function renderLes(){
  regN=Math.max(regN,500);analyze();const L=lessons(),x=X();$('lesSong').textContent=x.lesOn(curSong().name||'—');
- if(!L.length){$('ll').innerHTML='';$('lesson').innerHTML=`<p class="empty">${x.empty}</p>`;return}
- if(les==null)les=recLes();if(les>=L.length)les=0;const l=L[les],rl=recLes();
+ if(!L.length){$('lpath').innerHTML='';$('lbar').innerHTML='';$('lesson').innerHTML=`<p class="empty">${x.empty}</p>`;return}
+ if(les==null){les=recLes();lstep=0}if(les>=L.length)les=0;const l=L[les],rl=recLes(),part=partOf(les);
+ $('lesAll').textContent=x.allLesN(done.length,L.length);
+ // the path: only the 6 lessons of the current part
+ const idx=L.map((m,i)=>i).filter(i=>partOf(i)===part);
+ $('lpath').innerHTML=`<div class="lbl">${x.partL[part]}</div><div class="dots">${idx.map(i=>`<button data-li="${i}" class="${done.includes(L[i].id)?'dn':''}${i===les?' on':''}" aria-label="${esc(L[i].t)}">${done.includes(L[i].id)?'✓':i-idx[0]+1}</button>`).join('<i></i>')}</div>`;
  $('ll').innerHTML=CHAPTERS.map((c,ci)=>`<div class="chap">${ci+1}. ${c[lang==='cs'?0:1]}</div>`+L.map((m,i)=>m.ch!==ci?'':`<button class="${done.includes(m.id)?'dn':''}${i===les?' on':''}" data-li="${i}"><span class="n">${done.includes(m.id)?'✓':i+1}</span>${m.t}${i===rl&&!done.includes(m.id)?` <em class="sh">${x.startHere}</em>`:''}</button>`).join('')).join('');
- const rot=((curSong().name||'').length+les)%l.o.length,ord=l.o.map((v,i)=>(i+rot)%l.o.length);
- $('lesson').innerHTML=`<div class="lbl">${x.lesOf(les+1,L.length)} · ${CHAPTERS[l.ch][lang==='cs'?0:1]}</div><h2>${l.t}</h2>${knowIt(les,l.id)&&!done.includes(l.id)?`<p class="know">${x.knowIt}</p>`:''}<p class="body">${l.b}</p>
- <div class="exp"><div class="lbl">${x.listenL}</div><div class="row">${l.e.map(([lb,it,o])=>pbtn(lb,it,{...(o||{}),cls:'fire'})).join('')}</div><p class="t" style="margin-top:10px">${l.en}</p></div>
- <div class="task"><div class="lbl">${x.taskL}</div><p>${PL()==='beg'&&l.taskBeg?l.taskBeg:l.task}</p></div>
- <div class="quiz"><p class="qq">${l.q}</p><div class="opts">${ord.map(i=>`<button data-ok="${i===l.ok?1:0}">${l.o[i]}</button>`).join('')}</div><p class="qfb" id="qfb"></p></div>
- <div class="row" style="margin-top:18px">${les?`<button data-ln="-1">${x.prev}</button>`:''}${les<L.length-1?`<button class="pri" data-ln="1">${x.next}</button>`:''}</div>`;
- $('lesson').dataset.w=l.w;$('lesson').dataset.id=l.id;
+ const st=LSTEPS[lstep],know=knowIt(les,l.id)&&!done.includes(l.id);
+ const prog=`<div class="lsteps">${LSTEPS.slice(0,4).map((k,i)=>`<span class="${i<lstep?'dn':i===lstep?'on':''}"></span>`).join('')}</div>`;
+ let body='';
+ if(st==='idea')body=`<div class="lbl">${x.lesOf(les+1,L.length)}</div><h2>${l.t}</h2>${know?`<p class="know">${x.knowIt2}</p>`:''}<p class="body">${l.b}</p>`;
+ if(st==='listen')body=`<div class="lbl">🎧 ${x.listenL}</div><h2>${l.t}</h2><div class="bigbtns">${l.e.map(([lb,it,o])=>pbtn(lb,it,{...(o||{}),cls:'fire'})).join('')}</div><p class="body">${l.en}</p>`;
+ if(st==='play')body=`<div class="lbl">🎸 ${x.taskL}</div><h2>${l.t}</h2><p class="body big">${PL()==='beg'&&l.taskBeg?l.taskBeg:l.task}</p>`;
+ if(st==='quiz'){const rot=((curSong().name||'').length+les)%l.o.length,ord=l.o.map((v,i)=>(i+rot)%l.o.length);
+  body=`<div class="lbl">❓ ${x.quizL}</div><p class="qq">${l.q}</p><div class="opts">${ord.map(i=>`<button data-ok="${i===l.ok?1:0}" data-oi="${i}" class="${lAns==null?'':i===l.ok&&lAns===l.ok?'ok':i===lAns?'no':''}">${l.o[i]}</button>`).join('')}</div><p class="qfb" id="qfb">${lAns==null?'':lAns===l.ok?x.right+' '+l.w:x.wrong}</p>`}
+ if(st==='done'){const nx=les<L.length-1?L[les+1]:null;body=`<div class="donebox"><div class="big">🎉</div><h2>${x.lesDone(l.t)}</h2><p class="body">${x.lesDoneSub}</p>${nx?`<p class="t">${x.nextIs(nx.t)}</p>`:`<p class="t">${x.allDone}</p>`}</div>`}
+ $('lesson').innerHTML=prog+`<div class="lcard">${body}</div>`;
+ const canNext=st!=='quiz'||lAns===l.ok;
+ $('lbar').innerHTML=st==='done'
+  ?`<button data-lb="again">${x.again}</button>${les<L.length-1?`<button class="fire" data-lb="nextles">${x.next}</button>`:`<button class="fire" data-lb="five">${x.to5}</button>`}`
+  :`${lstep?`<button data-lb="back">←</button>`:`<button data-lb="skip">${know?x.skipKnow:x.skipQ}</button>`}<button class="fire" data-lb="next" ${canNext?'':'disabled'}>${st==='quiz'?x.finish:x.cont}</button>`;
+ $('lesson').dataset.id=l.id;
 }
+function lesGo(i){les=i;lstep=0;lAns=null;store.set('pcz-les',les);stopPlay();renderLes();window.scrollTo(0,0)}
 function lessonDone(id){if(done.includes(id))return false;done.push(id);store.set('pcz-done2',done);if(!cards[id]){cards[id]={b:1,due:addDays(1)};store.set('pcz-cards',cards)}return true}
 document.addEventListener('DOMContentLoaded',()=>{
- $('ll').addEventListener('click',e=>{const b=e.target.closest('[data-li]');if(b){les=+b.dataset.li;store.set('pcz-les',les);stopPlay();renderLes();if(innerWidth<860)$('lesson').scrollIntoView({behavior:'smooth'})}});
+ const pick=e=>{const b=e.target.closest('[data-li]');if(b){$('lesOv').hidden=true;lesGo(+b.dataset.li)}};
+ $('ll').addEventListener('click',pick);$('lpath').addEventListener('click',pick);
+ $('lesAll').onclick=()=>{$('lesOv').hidden=false};$('lesOvX').onclick=()=>{$('lesOv').hidden=true};$('lesOv').addEventListener('click',e=>{if(e.target.id==='lesOv')$('lesOv').hidden=true});
+ $('lbar').addEventListener('click',e=>{const b=e.target.closest('[data-lb]');if(!b)return;const a=b.dataset.lb;stopPlay();
+  if(a==='next'){lstep=Math.min(4,lstep+1)}else if(a==='back'){lstep=Math.max(0,lstep-1)}else if(a==='skip'){lstep=3}
+  else if(a==='again'){lstep=0;lAns=null}else if(a==='nextles'){return lesGo(les+1)}else if(a==='five'){return go('five')}
+  renderLes();window.scrollTo(0,0)});
  $('lesson').addEventListener('click',e=>{
-  const n=e.target.closest('[data-ln]');if(n){les+=+n.dataset.ln;store.set('pcz-les',les);stopPlay();renderLes();window.scrollTo({top:0,behavior:'smooth'});return}
-  const b=e.target.closest('[data-ok]');if(!b)return;const ok=b.dataset.ok==='1';
-  b.classList.add(ok?'ok':'no');let msg=ok?X().right+' '+$('lesson').dataset.w:X().wrong;
-  if(ok&&lessonDone($('lesson').dataset.id)){msg+=' '+X().addedCards;const s=document.querySelector(`[data-li="${les}"]`);if(s){s.classList.add('dn');s.querySelector('.n').textContent='✓'}}
-  $('qfb').textContent=msg;
+  const b=e.target.closest('[data-ok]');if(!b||lAns===+lessons()[les].ok)return;lAns=+b.dataset.oi;
+  if(b.dataset.ok==='1'&&lessonDone($('lesson').dataset.id)){}
+  renderLes();
+  if(b.dataset.ok==='1'){const q=$('qfb');if(q&&!q.textContent.includes(X().addedCards))q.textContent+=' '+X().addedCards}
  });
 });
 

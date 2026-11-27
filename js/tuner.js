@@ -12,22 +12,33 @@ function renderTuner(){
  $('tuning').innerHTML=x.tg.map((g,gi)=>`<optgroup label="${esc(g)}">${TUN.filter(t=>t.g===gi).map(t=>`<option value="${t.id}"${t.id===tuningId?' selected':''}>${esc(g)}: ${esc(t.n[li])}, ${t.m.filter((m,i)=>t.g!==1||i%2===0).map(m=>nsh(m)).join(' ')}</option>`).join('')}</optgroup>`).join('');
  $('strs').innerHTML=tunTargets().map(t=>`<button data-ti="${t.i}" class="${tLock===t.i?'on':''}">${nsh(t.m)}<sub>${oct(t.m)}</sub></button>`).join('');
  if(!$('ticks').innerHTML){let h='';for(let c=-50;c<=50;c+=10){const a=(c/50)*60*Math.PI/180,r1=c%50?112:106,r2=124;h+=`<line x1="${150+r1*Math.sin(a)}" y1="${150-r1*Math.cos(a)}" x2="${150+r2*Math.sin(a)}" y2="${150-r2*Math.cos(a)}" stroke="#ffffff70" stroke-width="2"/>`}$('ticks').innerHTML=h}
- micUI();if(!Mic.on){$('tnote').textContent='–';$('thint').textContent='';$('thint').className='thint';$('needle').style.transform='rotate(0deg)'}
+ micUI();if(!Mic.on){$('v-tuner').classList.remove('intune','hold');$('tnote').textContent='–';$('thint').textContent='';$('thint').className='thint';$('needle').style.transform='rotate(0deg)'}
 }
+let tOk=0,tLast=0,tNeed=0;
 function tunerHear(p){
- const th=$('thint'),x=X();
- if(!p){if(++tQ>6){th.textContent=x.quiet;th.className='thint';$('needle').style.transform='rotate(0deg)'}tSm=[];return}tQ=0;
- tSm.push(p.midi);if(tSm.length>5)tSm.shift();const m=[...tSm].sort((a,b)=>a-b)[tSm.length>>1];
+ const th=$('thint'),x=X(),tv=$('v-tuner');
+ if(!p||p.clar<0.75){tQ++;
+  // keep the last reading on screen ~3 s so you have time to look, then fade
+  if(tQ===8)tv.classList.add('hold');
+  if(tQ>55){th.textContent=x.quiet;th.className='thint';tv.classList.remove('intune','hold');$('needle').style.transform='rotate(0deg)';tOk=0}
+  tSm=[];return}
+ tQ=0;tv.classList.remove('hold');
+ tSm.push(p.midi);if(tSm.length>7)tSm.shift();const so=[...tSm].sort((a,b)=>a-b),mid=so.length>>1,m=so.length>=3?(so[mid-1]+so[mid]+so[mid+1])/3:so[mid];
  let tg=null;const ts=tunTargets();
  if(tLock!=null&&!$('tauto').checked)tg=ts[tLock];else{let bd=99;for(const t of ts){const d=Math.abs(m-t.m);if(d<bd){bd=d;tg=t}}if(tLock!=null&&$('tauto').checked&&Math.abs(m-ts[tLock].m)<1.5)tg=ts[tLock]}
  const cents=(m-tg.m)*100,cl=Math.max(-50,Math.min(50,cents));
- $('needle').style.transform=`rotate(${cl/50*60}deg)`;
+ tNeed=tNeed?tNeed+(cl-tNeed)*.45:cl;
+ $('needle').style.transform=`rotate(${tNeed/50*60}deg)`;
  const far=Math.abs(cents)>100,cm=Math.round(m);
  $('tnote').innerHTML=far?`${nsh(cm)}<sub>${oct(cm)}</sub>`:`${nsh(tg.m)}<sub>${oct(tg.m)}</sub>`;
- const ok=Math.abs(cents)<=5;th.className='thint'+(ok?' ok':'');th.textContent=ok?x.inT:far?x.farT(nsh(tg.m)+oct(tg.m),cents<0):(cents<0?x.low:x.high)+` (${cents>0?'+':''}${Math.round(cents)})`;
- document.querySelectorAll('#strs button').forEach(b=>b.classList.toggle('near',+b.dataset.ti===tg.i));
+ const ok=Math.abs(cents)<=4||(tOk>0&&Math.abs(cents)<=7);tOk=ok?tOk+1:0;const shown=tOk>=3;
+ tv.classList.toggle('intune',shown);
+ th.className='thint'+(shown?' ok':'');
+ th.innerHTML=shown?x.inT:far?esc(x.farT(nsh(tg.m)+oct(tg.m),cents<0)):`<b class="arr">${cents<0?'▲':'▼'}</b> ${cents<0?x.low:x.high} <span class="cn">${cents>0?'+':''}${Math.round(cents)}</span>`;
+ if(shown&&tOk===3&&navigator.vibrate)navigator.vibrate(40);
+ document.querySelectorAll('#strs button').forEach(b=>{b.classList.toggle('near',+b.dataset.ti===tg.i);if(shown&&+b.dataset.ti===tg.i)b.classList.add('done')});
 }
-function setMicCb(){Mic.minHz=view==='tuner'?Math.max(25,440*2**((Math.min(...tunTargets().map(t=>t.m))-69)/12)*.8):70;Mic.cb=view==='tuner'?tunerHear:(view==='five'&&FV.scr==='notesEx'&&EX?exHear:null)}
+function setMicCb(){Mic.minHz=view==='tuner'?Math.max(25,440*2**((Math.min(...tunTargets().map(t=>t.m))-69)/12)*.8):70;Mic.cb=view==='tuner'?tunerHear:(view==='five'&&FV.scr==='notesEx'&&EX?exHear:view==='five'&&FV.scr==='quest'&&Q?qHear:null)}
 document.addEventListener('DOMContentLoaded',()=>{
  $('tuning').onchange=e=>{tuningId=e.target.value;store.set('pcz-tuning',tuningId);tLock=null;renderTuner();setMicCb()};
  $('strs').onclick=e=>{const b=e.target.closest('[data-ti]');if(!b)return;const i=+b.dataset.ti;tLock=tLock===i?null:i;if($('tref').checked)pling(curTun().m[i]);renderTuner()};

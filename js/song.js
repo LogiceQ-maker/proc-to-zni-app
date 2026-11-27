@@ -1,11 +1,14 @@
 'use strict';
 /* ---------- song view: Hraj · Rozbor · Sólo ---------- */
-let pcapo=store.get('pcz-capo',{}),fsz=store.get('pcz-fs',18),scrSpd=store.get('pcz-scroll',4),scrOn=false,scrRaf=0,wake=null,playCh=[],adjOpen=false,camp=false;
+let pcapo=store.get('pcz-capo',{}),fsz=store.get('pcz-fs',18),scrSpd=store.get('pcz-scroll2',3),scrOn=false,scrRaf=0,wake=null,playCh=[],adjOpen=false,camp=false;
+let simpOn=store.get('pcz-simp',{});
+const simp=c=>({root:c.root,q:c.q==='m'||c.q==='d'?'m':'M',ext:'',bass:null});
+const isSimp=()=>!!simpOn[cur];
 let opened=store.get('pcz-opened',{}),ssort=store.get('pcz-ssort','recent');
 const gq=t=>`<button class="q" data-g="${t}" aria-label="?">?</button>`;
 const REPS=()=>[X().rep0,X().rep1,X().rep2,X().rep3];
 function repChip(id){const r=rep[id]||0;return `<button class="rep r${r}" data-rep="${esc(id)}">${REPS()[r]}</button>`}
-function stepper(id,label,val){return `<div class="stp"><span class="muted">${label}</span><div class="row"><button class="sq" data-st="${id}" data-d="-1" aria-label="-">−</button><output>${val}</output><button class="sq" data-st="${id}" data-d="1" aria-label="+">+</button></div></div>`}
+function stepper(id,label,val){return `<div class="stp"><span class="muted">${label}</span><div class="row"><button class="sq" data-st="${id}" data-d="-1" aria-label="-">−</button><output data-o="${id}">${val}</output><button class="sq" data-st="${id}" data-d="1" aria-label="+">+</button></div></div>`}
 function renderSong(){
  stopPlay();regN=0;analyze();
  $('pickN').textContent=curSong().name||'—';
@@ -16,7 +19,7 @@ function renderSong(){
  renderChords();renderWhy();drawSolo();wakeSync();
 }
 /* --- Hraj (songbook) --- */
-function chipFor(c){const t=tp(c,shift),cp=pcapo[cur]||0,i=playCh.length;playCh.push(tp(t,-cp));return {html:`<button class="ch" data-chi="${i}">${esc(cname(t,cp))}</button>`,len:cname(t,cp).length}}
+function chipFor(c0){const c=isSimp()?simp(c0):c0,t=tp(c,shift),cp=pcapo[cur]||0,i=playCh.length;playCh.push(tp(t,-cp));return {html:`<button class="ch" data-chi="${i}">${esc(cname(t,cp))}</button>`,len:cname(t,cp).length}}
 function songBody(text){
  return (text||'').split(/\r?\n/).map(line=>{
   if(/\[[^\]]+\]/.test(line))return '<div class="ln">'+line.split(/(\[[^\]]+\])/).map(seg=>{const m=/^\[([^\]]+)\]$/.exec(seg);if(m){const c=chord(m[1]);return c?chipFor(c).html:esc(seg)}return esc(seg)}).join('')+'</div>';
@@ -24,49 +27,53 @@ function songBody(text){
   return `<div class="ln">${esc(line)||'&nbsp;'}</div>`;
  }).join('');
 }
+const diffS=c=>vFor(c).l;
 const ckey2=c=>c.root+'|'+c.q+'|'+c.ext;
 function renderPlay(){
  const x=X(),cp=pcapo[cur]||0,best=capos(A.us)[0];playCh=[];
  const body=songBody(curSong().text);
  const shapes=uniq(playCh.map(c=>ckey2(c))).map(k=>playCh.find(c=>ckey2(c)===k));
  const welcome=!mine.length?`<div class="welcome"><h3>${x.welcomeT}</h3><ol>${x.welcomeSteps.map(s=>`<li>${s}</li>`).join('')}</ol><button class="fire" id="wAdd">${x.welcomeBtn}</button><p class="t">${x.welcomeEx}</p></div>`:'';
- const status=[cp?`<span class="pill">${x.capoShort} ${cp}</span>`:'',shift?`<span class="pill">${x.transposed(shift)}</span>`:''].join('');
+ const status=[isSimp()?`<button class="pill" id="simpX">${x.simpPill} ✕</button>`:'',cp?`<span class="pill">${x.capoShort} ${cp}</span>`:'',shift?`<span class="pill">${x.transposed(shift)}</span>`:''].join('');
  $('p-play').innerHTML=welcome+`<div class="pbar">
   <button class="${scrOn?'fire':'pri'}" id="scrBtn">${scrOn?x.scrStop:x.scrGo}</button>
-  <button id="campBtn">${x.campGo}</button>
+  ${scrOn?`<div class="spd" aria-label="${esc(x.speedL)}"><button class="sq" data-st="sp" data-d="-1" aria-label="-">🐢</button><output id="spdV">${scrSpd}</output><button class="sq" data-st="sp" data-d="1" aria-label="+">🐇</button></div>`:''}
+  ${scrOn?`<span class="muted spdl">${x.speedL}</span>`:`<button id="campBtn">${x.campGo}</button>
   <button id="adjBtn" class="${adjOpen?'on':''}">${x.adjust} ${adjOpen?'▴':'▾'}</button>
-  <button id="shBtn">${x.share}</button>
+  <button id="shBtn">${x.share}</button>`}
   ${status}
-  ${adjOpen?`<div class="adj">${stepper('fs',x.fontL,fsz)}${stepper('cp',x.capoShort,cp)}${stepper('tr',x.transpL,(shift>0?'+':'')+shift)}${stepper('sp',x.speedL,scrSpd)}<div class="stp"><span class="muted">${x.stateL}</span>${repChip(cur)}</div></div>`:''}
+  ${adjOpen&&!scrOn?`<div class="adj"><div class="stp"><span class="muted">${x.simpL}</span><button id="simpT" class="${isSimp()?'on':''}">${isSimp()?x.simpOn:x.simpOff}</button></div>${stepper('fs',x.fontL,fsz)}${stepper('cp',x.capoShort,cp)}${stepper('tr',x.transpL,(shift>0?'+':'')+shift)}${stepper('sp',x.speedL,scrSpd)}<div class="stp"><span class="muted">${x.stateL}</span>${repChip(cur)}</div></div>`:''}
  </div>
  ${best.k&&best.k!==cp?`<p class="t capnote"><button class="link" id="cpBest">${x.capoTry(best.k)}</button></p>`:''}${cp?`<p class="t capnote">${x.capoNote(cp)}</p>`:''}
+ ${!isSimp()&&shapes.some(c=>c.ext||c.bass!=null||c.q==='d'||c.q==='a'||c.q==='s'||diffS(c)>1)?`<p class="t capnote"><button class="link" id="simpH">${x.simpHint}</button></p>`:''}
  ${shapes.length?`<div class="cbar" aria-label="${esc(x.chordsInSong)}">${shapes.map((c,i)=>`<button class="cbi" data-cbi="${i}"><b>${esc(cname(tp(c,cp),cp))}</b>${diag(vFor(c))}</button>`).join('')}</div>`:''}
  <div class="sheetv" style="font-size:${camp?fsz+6:fsz}px">${body}</div>
  <p class="t hint">${x.playHint}</p>`;
  $('p-play')._shapes=shapes;fitSheet();
  $('scrBtn').onclick=()=>{scrOn?stopScroll():startScroll();renderPlay()};
- $('campBtn').onclick=()=>setCamp(true);
- $('adjBtn').onclick=()=>{adjOpen=!adjOpen;renderPlay()};
- $('shBtn').onclick=()=>shareSong(curSong());
+ if($('campBtn')){$('campBtn').onclick=()=>setCamp(true);$('adjBtn').onclick=()=>{adjOpen=!adjOpen;renderPlay()};$('shBtn').onclick=()=>shareSong(curSong())}
  if($('wAdd'))$('wAdd').onclick=()=>{openSongs();openEdit(null)};
+ const st=()=>{simpOn[cur]=!isSimp();store.set('pcz-simp',simpOn);renderPlay()};['simpT','simpX','simpH'].forEach(id=>{if($(id))$(id).onclick=st});
  if($('cpBest'))$('cpBest').onclick=()=>{pcapo[cur]=best.k;store.set('pcz-capo',pcapo);renderPlay()};
 }
-function fitSheet(){const sv=$('p-play').querySelector('.sheetv');if(!sv||$('p-play').hidden)return;let f=camp?fsz+6:fsz;sv.style.fontSize=f+'px';while(f>11&&sv.scrollWidth>sv.clientWidth+1){f--;sv.style.fontSize=f+'px'}}
+let campF=0;
+function fitSheet(){const sv=$('p-play').querySelector('.sheetv');if(!sv||$('p-play').hidden)return;if(camp&&campF){sv.style.fontSize=campF+'px';return}let f=camp?fsz+6:fsz;sv.style.fontSize=f+'px';while(f>11&&sv.scrollWidth>sv.clientWidth+1){f--;sv.style.fontSize=f+'px'}if(camp)campF=f;campUI()}
 window.addEventListener('resize',()=>{if(view==='song'&&sub==='play')fitSheet()});
 function adjStep(id,d){
  if(id==='fs'){fsz=Math.max(12,Math.min(34,fsz+2*d));store.set('pcz-fs',fsz)}
  if(id==='cp'){pcapo[cur]=Math.max(0,Math.min(9,(pcapo[cur]||0)+d));store.set('pcz-capo',pcapo)}
  if(id==='tr'){shift=Math.max(-11,Math.min(11,shift+d))}
- if(id==='sp'){scrSpd=Math.max(1,Math.min(10,scrSpd+d));store.set('pcz-scroll',scrSpd)}
+ if(id==='sp'){scrSpd=Math.max(1,Math.min(10,scrSpd+d));store.set('pcz-scroll2',scrSpd);document.querySelectorAll('#spdV,.stp output[data-o="sp"],#cSpd').forEach(o=>o.textContent=scrSpd);return}
  if(id==='tr')renderSong();else renderPlay();
 }
-function startScroll(){scrOn=true;let last=performance.now(),acc=0;const step=t=>{if(!scrOn)return;const dt=(t-last)/1000;last=t;acc+=dt*(4+scrSpd*5);if(acc>=1){const n=Math.floor(acc);acc-=n;window.scrollBy(0,n)}if(window.innerHeight+window.scrollY>=document.body.scrollHeight-2){stopScroll();if(sub==='play'&&view==='song'&&!camp)renderPlay();return}scrRaf=requestAnimationFrame(step)};scrRaf=requestAnimationFrame(step);campUI()}
+function startScroll(){scrOn=true;let last=performance.now(),acc=0;const step=t=>{if(!scrOn)return;const dt=(t-last)/1000;last=t;acc+=dt*(scrSpd*3);if(acc>=1){const n=Math.floor(acc);acc-=n;window.scrollBy(0,n)}if(window.innerHeight+window.scrollY>=document.body.scrollHeight-2){stopScroll();if(sub==='play'&&view==='song'&&!camp)renderPlay();return}scrRaf=requestAnimationFrame(step)};scrRaf=requestAnimationFrame(step);campUI()}
 function stopScroll(){scrOn=false;cancelAnimationFrame(scrRaf);campUI()}
 async function wakeSync(){const want=view==='song'&&sub==='play'&&!document.hidden;try{if(want&&!wake&&navigator.wakeLock){wake=await navigator.wakeLock.request('screen');wake.addEventListener('release',()=>{wake=null})}else if(!want&&wake){await wake.release();wake=null}}catch(e){wake=null}}
 document.addEventListener('visibilitychange',wakeSync);
 /* campfire mode */
-function setCamp(on){camp=on;document.body.classList.toggle('camp',on);$('campBar').hidden=!on;if(on)sub='play';renderSong();if(on){window.scrollTo(0,0);toast(X().campTip)}campUI()}
-function campUI(){const b=$('cScr');if(b)b.textContent=scrOn?X().scrStop:X().scrGo}
+function setCamp(on){camp=on;campF=0;document.body.classList.toggle('camp',on);$('campBar').hidden=!on;if(on)sub='play';renderSong();if(on){window.scrollTo(0,0);toast(X().campTip)}campUI()}
+function campUI(){const b=$('cScr');if(b){b.textContent=scrOn?'⏸':'▶';b.setAttribute('aria-label',scrOn?X().scrStop:X().scrGo)}const f=$('cFs');if(f)f.textContent=campF||fsz;const v=$('cSpd');if(v)v.textContent=scrSpd}
+function campFont(d){const sv=$('p-play').querySelector('.sheetv');campF=Math.max(12,Math.min(48,(campF||fsz+6)+2*d));if(sv)sv.style.fontSize=campF+'px';campUI()}
 /* --- Rozbor --- */
 function renderChords(){
  const {cs,us,k}=A,x=X(),beg=level==='beg',el=$('rozbor');
@@ -197,7 +204,7 @@ document.addEventListener('DOMContentLoaded',()=>{
   toast(X().deleted(lastDeleted.s.name),X().undo,()=>{if(!lastDeleted)return;mine.splice(lastDeleted.i,0,lastDeleted.s);store.set('pcz-songs',mine);lastDeleted=null;if(!$('songOv').hidden)renderSongList();refreshView()})};
  $('impY').onclick=()=>{if(!pendingImp)return;const s=addSong(pendingImp.name,pendingImp.text);pendingImp=null;pickSong(s.id);$('impOv').hidden=true;sub='play';toast(X().importDone(s.name));if(view!=='song')go('song');else refreshView()};
  $('impN2').onclick=()=>{$('impOv').hidden=true;pendingImp=null};
- $('cfm').onclick=()=>{fsz=Math.max(12,fsz-2);store.set('pcz-fs',fsz);renderPlay()};$('cfp').onclick=()=>{fsz=Math.min(34,fsz+2);store.set('pcz-fs',fsz);renderPlay()};
- $('cScr').onclick=()=>{scrOn?stopScroll():startScroll()};$('csm').onclick=()=>{scrSpd=Math.max(1,scrSpd-1);store.set('pcz-scroll',scrSpd)};$('csp').onclick=()=>{scrSpd=Math.min(10,scrSpd+1);store.set('pcz-scroll',scrSpd)};
+ $('cfm').onclick=e=>{e.stopPropagation();campFont(-1)};$('cfp').onclick=e=>{e.stopPropagation();campFont(1)};
+ $('cScr').onclick=()=>{scrOn?stopScroll():startScroll()};$('csm').onclick=e=>{e.stopPropagation();adjStep('sp',-1)};$('csp').onclick=e=>{e.stopPropagation();adjStep('sp',1)};
  $('cExit').onclick=()=>{stopScroll();setCamp(false)};
 });

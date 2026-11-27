@@ -102,7 +102,18 @@ const seq=()=>seqOf(A.cs).slice(0,16);
 
 /* ---------- sound ---------- */
 let ac=null,master=null,playT=[];const bufs={};
-function actx(){if(!ac)ac=new (window.AudioContext||window.webkitAudioContext)();if(ac.state!=='running')ac.resume();return ac}
+function aSess(t){try{if(navigator.audioSession&&navigator.audioSession.type!==t)navigator.audioSession.type=t}catch(e){}}
+function actx(){if(!ac){aSess('playback');ac=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'})}if(ac.state!=='running')try{ac.resume()}catch(e){}return ac}
+/* iPhone: Web Audio is muted by the silent switch and starts suspended. Unlock on the first touch:
+   - audioSession 'playback' (iOS 17+) ignores the silent switch
+   - a short silent <audio> element does the same on older iOS
+   - resume the AudioContext inside the gesture */
+const SILENT='data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YUAGAACAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICA';
+let unlocked=false,silentEl=null;
+function unlockAudio(){try{actx();if(ac.state==='running'&&unlocked)return;const o=ac.createOscillator(),g=ac.createGain();g.gain.value=0;o.connect(g).connect(ac.destination);o.start();o.stop(ac.currentTime+.02);
+ if(!silentEl){silentEl=new Audio(SILENT);silentEl.setAttribute('playsinline','');silentEl.preload='auto'}const pr=silentEl.play();if(pr&&pr.then)pr.then(()=>{unlocked=true}).catch(()=>{});else unlocked=true}catch(e){}}
+['pointerdown','touchend','click','keydown'].forEach(ev=>document.addEventListener(ev,unlockAudio,{capture:true,passive:true}));
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ac&&ac.state!=='running')try{ac.resume()}catch(e){}});
 function pluckBuf(m){if(bufs[m])return bufs[m];const f=440*2**((m-69)/12),sr=ac.sampleRate,len=Math.floor(sr*1.8),N=Math.max(2,Math.round(sr/f)),b=ac.createBuffer(1,len,sr),d=b.getChannelData(0);
  let p=0;for(let i=0;i<N;i++){const r=Math.random()*2-1;d[i]=(r+p)*.5;p=r}for(let i=N;i<len;i++)d[i]=.4985*(d[i-N]+d[i-N+1]);return bufs[m]=b}
 function note(m,t,g,dest,dur){const s=ac.createBufferSource(),v=ac.createGain();s.buffer=pluckBuf(m);v.gain.setValueAtTime(g,t);if(dur){v.gain.setValueAtTime(g,t+dur);v.gain.exponentialRampToValueAtTime(.0001,t+dur+.08)}s.connect(v).connect(dest||master);s.start(t);if(dur)s.stop(t+dur+.1)}
@@ -140,7 +151,7 @@ function geo(W,H,NF,vert){
 }
 function drawBoard(el){
  const o=el._o,svg=el.querySelector('svg');if(!o||!svg)return;const W=el.clientWidth;if(!W)return;
- const NF=o.frets||12,vert=W<560,H=vert?Math.round(74+NF*Math.max(34,Math.min(44,W/9))):Math.round(Math.max(220,Math.min(270,W*.3)));
+ const NF=o.frets||12,vert=!o.horiz&&W<560,H=vert?Math.round(74+NF*Math.max(34,Math.min(44,W/9))):Math.round(Math.max(W<560?150:220,Math.min(270,W*.3)));
  if(el._h!==H){el._h=H;el.style.height=H+'px'}
  const g=geo(W,H,NF,vert),lf=!!o.lefty,X_=x=>lf?W-x:x,RX=(x,w)=>lf?W-x-w:x;el._g={g,lf};
  let h=`<rect x="${RX(g.RC[0],g.RC[2])}" y="${g.RC[1]}" width="${g.RC[2]}" height="${g.RC[3]}" rx="4" fill="var(--wood)"/>`;
@@ -163,28 +174,61 @@ function boardTap(e){const el=e.currentTarget,o=el._o;if(!o||!o.tap||!el._g)retu
 const Mic={on:false,cb:null,minHz:60,rms:0};
 function micMsg(t){document.querySelectorAll('.micmsg').forEach(e=>e.textContent=t||'')}
 function micUI(){document.querySelectorAll('[data-mic]').forEach(b=>{const tun=b.closest('#v-tuner');b.textContent=Mic.on?(tun?X().tuneStop:X().micOff):(tun?X().tuneStart:X().micOn)});document.querySelectorAll('.dotm').forEach(d=>d.classList.toggle('on',Mic.on))}
+let micKeep=0;
+async function getMicStream(){
+ if(Mic.stream&&Mic.stream.getTracks().some(t=>t.readyState==='live'))return Mic.stream;
+ aSess('play-and-record');
+ const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+ Mic.stream=st;store.set('pcz-mic','ok');return st;
+}
 async function micStart(){
- if(Mic.on)return true;micMsg('');
+ if(Mic.on)return true;micMsg('');try{actx()}catch(e){}
  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){micMsg(X().micNA);return false}
- try{const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
-  actx();Mic.stream=st;Mic.src=ac.createMediaStreamSource(st);Mic.an=ac.createAnalyser();Mic.an.fftSize=8192;Mic.src.connect(Mic.an);Mic.buf=new Float32Array(Mic.an.fftSize);Mic.on=true;Mic.t=setInterval(micTick,55);micUI();return true}
+ try{clearTimeout(micKeep);const st=await getMicStream();
+  actx();if(ac.state!=='running')try{await ac.resume()}catch(e){}
+  Mic.src=ac.createMediaStreamSource(st);Mic.an=ac.createAnalyser();Mic.an.fftSize=8192;Mic.src.connect(Mic.an);Mic.buf=new Float32Array(Mic.an.fftSize);Mic.on=true;Mic.t=setInterval(micTick,50);micUI();return true}
  catch(e){micMsg(e&&(e.name==='NotAllowedError'||e.name==='SecurityError')?X().micDenied:X().micNA);return false}
 }
-function micStop(){if(!Mic.on)return;clearInterval(Mic.t);try{Mic.stream.getTracks().forEach(t=>t.stop());Mic.src.disconnect()}catch(e){}Mic.on=false;micUI()}
-function micTick(){Mic.an.getFloatTimeDomainData(Mic.buf);const p=pitch(Mic.buf,ac.sampleRate,Mic.minHz);if(Mic.cb)Mic.cb(p)}
+function micRelease(){try{if(Mic.stream)Mic.stream.getTracks().forEach(t=>t.stop())}catch(e){}Mic.stream=null;aSess('playback')}
+function micStop(){if(!Mic.on)return;clearInterval(Mic.t);try{Mic.src.disconnect()}catch(e){}Mic.on=false;micUI();clearTimeout(micKeep);micKeep=setTimeout(()=>{if(!Mic.on)micRelease()},90000)}
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&!Mic.on)micRelease()});
+function micTick(){Mic.an.getFloatTimeDomainData(Mic.buf);
+ if(Mic.ccb){let r=0;const b=Mic.buf;for(let i=b.length-2048;i<b.length;i++)r+=b[i]*b[i];r=Math.sqrt(r/2048);const pr=Mic.crms||0;Mic.crms=r;Mic.ccb(chroma(),r,r>pr*1.6&&r>0.004);return}
+ const p=pitch(Mic.buf,ac.sampleRate,Mic.minHz);if(Mic.cb)Mic.cb(p)}
+/* ---------- chord hearing: which of the 12 notes are sounding ---------- */
+function chroma(){
+ const an=Mic.an;if(!Mic.fb||Mic.fb.length!==an.frequencyBinCount)Mic.fb=new Float32Array(an.frequencyBinCount);
+ const fb=Mic.fb;an.getFloatFrequencyData(fb);const bin=ac.sampleRate/an.fftSize,ch=new Float32Array(12);
+ const lo=Math.ceil(72/bin),hi=Math.min(fb.length-2,Math.floor(1300/bin));let mx=-200;for(let i=lo;i<=hi;i++)if(fb[i]>mx)mx=fb[i];
+ const pk=[];
+ for(let i=lo;i<=hi;i++){const v=fb[i];if(v<mx-45||v<fb[i-1]||v<fb[i+1])continue;
+  const a=fb[i-1],c=fb[i+1],d=(a-c)/(2*(a-2*v+c)||1),f=(i+d)*bin,m=69+12*Math.log2(f/440);pk.push({f,m,amp:Math.pow(10,(v-mx)/20)})}
+ // overtones (3rd, 5th, 7th harmonic) of a lower note would add notes that aren't played, e.g. A + its 5th harmonic C# turns Am into A
+ for(const q of pk){for(const lo2 of pk){if(lo2.f>=q.f)break;const h=q.f/lo2.f,hr=Math.round(h);if(hr>=3&&hr<=7&&hr!==4&&Math.abs(1200*Math.log2(h/hr))<25&&lo2.amp>q.amp*.3){q.amp*=hr===3||hr===6?.5:.12;break}}}
+ for(const q of pk){const r=Math.round(q.m);if(Math.abs(q.m-r)>.4)continue;ch[((r%12)+12)%12]+=q.amp*q.amp*(q.m<64?1:q.m<76?.7:.45)}
+ let t=0;for(const v of ch)t+=v;if(t>0)for(let i=0;i<12;i++)ch[i]/=t;return ch}
+const pcsOf=c=>uniq(tones(c).map(t=>((c.root+t)%12+12)%12));
+function chordFit(ch,c){const P=pcsOf(c);let inn=0,mn=1;for(const p of P){inn+=ch[p];mn=Math.min(mn,ch[p])}return inn+Math.min(mn,.12)*1.5-(1-inn)*.5}
+
 function pitch(b,sr,minHz){
- const n=b.length>>1,c=new Float32Array(n);let rms=0;for(let i=0;i<n;i++){const v=(b[2*i]+b[2*i+1])*.5;c[i]=v;rms+=v*v}rms=Math.sqrt(rms/n);
- const prev=Mic.rms;Mic.rms=rms;if(rms<0.006)return null;
- const s2=sr/2,tmin=Math.floor(s2/1500),tmax=Math.min(Math.floor(s2/(minHz*.85)),n-256),W=Math.min(2048,n-tmax);if(W<256)return null;
- const d=new Float32Array(tmax+2);let run=0,best=-1;
- for(let t=1;t<=tmax+1;t++){let s=0;for(let j=0;j<W;j++){const x=c[j]-c[j+t];s+=x*x}run+=s;d[t]=run?s*t/run:1}
- for(let t=tmin;t<=tmax;t++){if(d[t]<0.12){while(t+1<=tmax&&d[t+1]<d[t])t++;best=t;break}}
- if(best<0){let m=1;for(let t=tmin;t<=tmax;t++)if(d[t]<m){m=d[t];best=t}if(m>0.3)return null}
- const x0=d[best-1]||d[best],x1=d[best],x2=d[best+1]||d[best],den=2*(2*x1-x2-x0),sh=den?(x2-x0)/den:0,f=s2/(best+sh);
- return {f,midi:69+12*Math.log2(f/440),rms,onset:rms>prev*1.7}
+ const n=b.length>>1,c=new Float32Array(n);let rms=0,mean=0;for(let i=0;i<n;i++){const v=(b[2*i]+b[2*i+1])*.5;c[i]=v;mean+=v}mean/=n;for(let i=0;i<n;i++){c[i]-=mean;rms+=c[i]*c[i]}rms=Math.sqrt(rms/n);
+ const prev=Mic.rms;Mic.rms=rms;if(rms<0.0018)return null;
+ const s2=sr/2,tmin=Math.max(2,Math.floor(s2/1400)),tmax=Math.min(Math.floor(s2/(minHz*.85)),n-256),W=Math.min(2048,n-tmax);if(W<256)return null;
+ const d=new Float32Array(tmax+2),raw=new Float32Array(tmax+2);let run=0;
+ for(let t=1;t<=tmax+1;t++){let s=0;for(let j=0;j<W;j++){const x=c[j]-c[j+t];s+=x*x}raw[t]=s;run+=s;d[t]=run?s*t/run:1}
+ // all local minima
+ const mins=[];let gmin=1,gt=-1;for(let t=tmin;t<=tmax;t++){if(d[t]<=d[t-1]&&d[t]<=d[t+1]){mins.push(t);if(d[t]<gmin){gmin=d[t];gt=t}}}
+ if(gt<0||gmin>0.35)return null;
+ // first dip that is nearly as good as the best one -> avoids picking a sub-octave (e.g. high E read as A)
+ let best=gt;const lim=Math.max(0.15,gmin+0.12);for(const t of mins){if(d[t]<lim){best=t;break}}
+ // octave guard: if half / third of the period is also a clear dip, the real pitch is higher
+ for(const k of [3,2]){const tk=Math.round(best/k);if(tk<tmin)continue;let bt=tk;for(let t=Math.max(tmin,tk-2);t<=Math.min(tmax,tk+2);t++)if(d[t]<d[bt])bt=t;if(d[bt]<Math.max(0.2,d[best]+0.08)&&d[bt]<=d[bt-1]&&d[bt]<=d[bt+1]){best=bt;break}}
+ const x0=raw[best-1],x1=raw[best],x2=raw[best+1],den=2*(2*x1-x2-x0),sh=den?Math.max(-1,Math.min(1,(x2-x0)/den)):0,f=s2/(best+sh);
+ return {f,midi:69+12*Math.log2(f/440),rms,clar:1-d[best],onset:rms>prev*1.7}
 }
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-mic]');if(!b)return;if(Mic.on){micStop();return}await micStart();setMicCb()});
 
 /* ---------- practice time ---------- */
 function streak(){let n=0;const d=new Date();if((plog[today()]||0)<300)d.setDate(d.getDate()-1);for(;;){if((plog[dkey(d)]||0)>=300){n++;d.setDate(d.getDate()-1)}else break}return n}
 setInterval(()=>{if(activeTrain&&view==='five'&&!document.hidden){const k=today();plog[k]=(plog[k]||0)+1;if(plog[k]%5===0)store.set('pcz-log',plog);if(typeof updToday==='function')updToday()}},1000);
+document.addEventListener('gesturestart',e=>e.preventDefault(),{passive:false});document.addEventListener('dblclick',e=>{if(!e.target.closest('input,textarea'))e.preventDefault()},{passive:false});

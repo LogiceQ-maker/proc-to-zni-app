@@ -2,7 +2,7 @@
 <html lang="cs">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <title>Proč to zní</title>
 <meta name="theme-color" content="#1c4634">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -57,9 +57,11 @@
 <section id="v-five" hidden><div id="fiveC"></div></section>
 
 <section id="v-lessons" hidden>
-  <h1 class="vt" data-t="tLes"></h1>
-  <p class="muted" id="lesSong"></p>
-  <div class="les"><div class="ll" id="ll"></div><div class="lesson" id="lesson"></div></div>
+  <div class="lhead"><div><h1 class="vt" data-t="tLes"></h1><p class="muted" id="lesSong"></p></div><button id="lesAll"></button></div>
+  <div class="lpath" id="lpath"></div>
+  <div class="lesson" id="lesson"></div>
+  <div class="lbar" id="lbar"></div>
+  <div class="ov" id="lesOv" hidden><div class="box"><div class="row" style="justify-content:space-between"><h2 data-t="allLes"></h2><button id="lesOvX" aria-label="×">✕</button></div><div class="ll" id="ll"></div></div></div>
 </section>
 
 <section id="v-tuner" hidden>
@@ -148,13 +150,14 @@
   <div class="row" style="justify-content:space-between"><h2 id="chT"></h2><button id="chClose" data-t="close"></button></div>
   <div class="chgrid" id="chB"></div>
   <p class="t" id="chTip"></p>
+  <div class="chchk" id="chChk"></div>
 </div></div>
 
 <div class="ov" id="impOv" hidden><div class="box" role="dialog" aria-modal="true">
   <div class="lbl" data-t="importT"></div><h2 id="impN"></h2><div class="sheetv imp" id="impTx"></div>
   <div class="row" style="margin-top:14px"><button class="fire" id="impY" data-t="importAdd"></button><button id="impN2" data-t="importNo"></button></div>
 </div></div>
-<div class="campbar" id="campBar" hidden><button class="sq" id="cfm">A−</button><button class="sq" id="cfp">A+</button><button class="pri" id="cScr"></button><button class="sq" id="csm" aria-label="slower">🐢</button><button class="sq" id="csp" aria-label="faster">🐇</button><button id="cExit" data-t="campExit"></button></div>
+<div class="campbar" id="campBar" hidden><div class="cgrp"><button class="sq" id="cfm" aria-label="A-">A−</button><output id="cFs"></output><button class="sq" id="cfp" aria-label="A+">A+</button></div><button class="pri" id="cScr"></button><div class="cgrp"><button class="sq" id="csm" aria-label="slower">🐢</button><output id="cSpd"></output><button class="sq" id="csp" aria-label="faster">🐇</button></div><button id="cExit" data-t="campExit"></button></div>
 <div class="toast" id="toast" hidden role="status"><span id="toastT"></span><button id="toastB"></button></div>
 <div class="sheet" id="sheet" hidden role="dialog"><h3 id="shT"></h3><p id="shX"></p><div class="row"><button class="fire" id="shA" hidden></button><button id="shC"></button></div></div>
 <div class="ov" id="ov" hidden><div class="box" role="dialog" aria-modal="true">
@@ -163,6 +166,12 @@
   <div class="lbl obq" data-t="playQ"></div><div class="lv" id="lvP"></div>
   <div class="lbl obq" data-t="theoryQ"></div><div class="lv" id="lv"></div>
   <button class="fire big1" id="obDone" data-t="okGo"></button>
+</div><div class="box" id="obMic" hidden role="dialog" aria-modal="true">
+  <div class="micbig" aria-hidden="true">🎤</div>
+  <h2 data-t="micT"></h2><p class="muted" data-t="micWhy"></p>
+  <button class="fire big1" id="obMicY" data-t="micAllow"></button>
+  <p class="t" id="obMicMsg"></p>
+  <button class="link" id="obMicN" data-t="micLater"></button>
 </div></div>
 
 <script src="js/core.js"></script>
@@ -171,6 +180,7 @@
 <script src="js/lessons.js"></script>
 <script src="js/song.js"></script>
 <script src="js/train.js"></script>
+<script src="js/quest.js"></script>
 <script src="js/tuner.js"></script>
 <script src="js/main.js"></script>
 </body>

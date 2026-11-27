@@ -1,30 +1,40 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="#f5efe2"/>
-  <ellipse cx="256" cy="446" rx="150" ry="16" fill="#e6dcc7"/>
-  <g stroke="#1c4634" stroke-linecap="round" stroke-linejoin="round" fill="none">
-    <!-- legs -->
-    <path d="M232 330 L206 438" stroke-width="26"/>
-    <path d="M280 330 L310 438" stroke-width="26"/>
-    <!-- body -->
-    <path d="M256 186 L256 330" stroke-width="64"/>
+  <g transform="translate(30 24) scale(.9)">
+  <ellipse cx="262" cy="452" rx="120" ry="13" fill="#e6dcc7"/>
+  <!-- legs + shoes -->
+  <g fill="#14201a">
+    <rect x="226" y="318" width="34" height="124" rx="14"/>
+    <rect x="270" y="318" width="34" height="124" rx="14"/>
+    <rect x="212" y="430" width="50" height="18" rx="9"/>
+    <rect x="270" y="430" width="50" height="18" rx="9"/>
   </g>
-  <!-- head -->
-  <circle cx="256" cy="116" r="52" fill="#1c4634"/>
-  <!-- guitar: neck + head, rotated -->
-  <g transform="rotate(-38 250 270)">
-    <rect x="236" y="70" width="28" height="170" rx="6" fill="#3a2318"/>
-    <rect x="230" y="40" width="40" height="44" rx="10" fill="#3a2318"/>
-    <g fill="#f5efe2"><circle cx="226" cy="52" r="6"/><circle cx="226" cy="72" r="6"/><circle cx="274" cy="52" r="6"/><circle cx="274" cy="72" r="6"/></g>
-    <g stroke="#f5efe2" stroke-width="2" opacity=".55"><line x1="244" y1="84" x2="244" y2="360"/><line x1="250" y1="84" x2="250" y2="360"/><line x1="256" y1="84" x2="256" y2="360"/></g>
-    <!-- body -->
-    <path d="M250 228 c-34 0 -56 22 -56 48 c0 16 8 26 8 34 c0 8 -18 20 -18 46 c0 36 30 62 66 62 c36 0 66 -26 66 -62 c0 -26 -18 -38 -18 -46 c0 -8 8 -18 8 -34 c0 -26 -22 -48 -56 -48z" fill="#ff5a1f"/>
-    <circle cx="250" cy="318" r="20" fill="#3a2318"/>
-    <rect x="226" y="372" width="48" height="10" rx="4" fill="#3a2318"/>
-    <g stroke="#f5efe2" stroke-width="2" opacity=".7"><line x1="244" y1="236" x2="244" y2="376"/><line x1="250" y1="236" x2="250" y2="376"/><line x1="256" y1="236" x2="256" y2="376"/></g>
+  <!-- torso -->
+  <rect x="214" y="168" width="104" height="168" rx="42" fill="#1c4634"/>
+  <!-- neck + head + hair -->
+  <rect x="254" y="146" width="24" height="30" rx="8" fill="#e8b28a"/>
+  <circle cx="266" cy="112" r="44" fill="#e8b28a"/>
+  <path d="M222 108 C222 72 246 62 268 62 C294 62 312 78 310 106 C300 92 284 86 266 88 C248 88 232 96 222 108Z" fill="#3a2318"/>
+  <!-- left arm (reaches to the neck) -->
+  <path d="M228 196 C190 212 150 232 132 252" stroke="#1c4634" stroke-width="30" stroke-linecap="round" fill="none"/>
+  <!-- guitar -->
+  <g transform="translate(-34 8) rotate(22 300 300)">
+    <rect x="34" y="282" width="46" height="36" rx="8" fill="#3a2318"/>
+    <g fill="#c9b89a"><circle cx="46" cy="278" r="5"/><circle cx="60" cy="278" r="5"/><circle cx="74" cy="278" r="5"/><circle cx="46" cy="322" r="5"/><circle cx="60" cy="322" r="5"/><circle cx="74" cy="322" r="5"/></g>
+    <rect x="76" y="289" width="196" height="22" fill="#5a3826"/>
+    <g stroke="#c9b89a" stroke-width="2"><line x1="104" y1="289" x2="104" y2="311"/><line x1="130" y1="289" x2="130" y2="311"/><line x1="155" y1="289" x2="155" y2="311"/><line x1="178" y1="289" x2="178" y2="311"/><line x1="200" y1="289" x2="200" y2="311"/><line x1="221" y1="289" x2="221" y2="311"/><line x1="241" y1="289" x2="241" y2="311"/></g>
+    <path d="M262 300 C262 258 288 244 312 250 C330 255 338 262 352 252 C378 236 424 250 426 300 C424 350 378 364 352 348 C338 338 330 345 312 350 C288 356 262 342 262 300Z" fill="#ff5a1f"/>
+    <circle cx="322" cy="300" r="20" fill="#3a2318"/>
+    <rect x="384" y="286" width="12" height="28" rx="3" fill="#3a2318"/>
+    <g stroke="#f5efe2" stroke-width="1.4" opacity=".9">
+      <line x1="76" y1="291.5" x2="390" y2="291.5"/><line x1="76" y1="295" x2="390" y2="295"/><line x1="76" y1="298.5" x2="390" y2="298.5"/>
+      <line x1="76" y1="302" x2="390" y2="302"/><line x1="76" y1="305.5" x2="390" y2="305.5"/><line x1="76" y1="309" x2="390" y2="309"/>
+    </g>
   </g>
-  <!-- arms -->
-  <g stroke="#1c4634" stroke-width="22" stroke-linecap="round" fill="none">
-    <path d="M234 198 C210 214 196 206 180 186"/>
-    <path d="M282 202 C318 236 320 290 292 316"/>
+  <!-- left hand wraps the neck -->
+  <circle cx="128" cy="254" r="14" fill="#e8b28a"/>
+  <!-- right arm strumming -->
+  <path d="M306 196 C346 226 336 284 300 308" stroke="#1c4634" stroke-width="30" stroke-linecap="round" fill="none"/>
+  <circle cx="292" cy="314" r="15" fill="#e8b28a"/>
   </g>
 </svg>

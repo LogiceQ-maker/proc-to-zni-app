@@ -1,6 +1,6 @@
 // Offline: keeps the app in the phone so it works at the campfire without wifi.
-const C='pcz-v5';
-const FILES=['./','./index.html','./app.css','./manifest.webmanifest','./apple-touch-icon.png','./icon-512.png','./favicon.png','./js/core.js','./js/i18n.js','./js/chords.js','./js/lessons.js','./js/song.js','./js/train.js','./js/tuner.js','./js/main.js'];
+const C='pcz-v6';
+const FILES=['./','./index.html','./app.css','./manifest.webmanifest','./apple-touch-icon.png','./icon-512.png','./favicon.png','./js/core.js','./js/i18n.js','./js/chords.js','./js/lessons.js','./js/song.js','./js/train.js','./js/quest.js','./js/tuner.js','./js/main.js'];
 self.addEventListener('install',e=>{e.waitUntil(caches.open(C).then(c=>c.addAll(FILES)).then(()=>self.skipWaiting()))});
 self.addEventListener('activate',e=>{e.waitUntil(caches.keys().then(ks=>Promise.all(ks.filter(k=>k!==C).map(k=>caches.delete(k)))).then(()=>self.clients.claim()))});
 self.addEventListener('fetch',e=>{

@@ -5,10 +5,10 @@ const PLAN=['changes','notes','cards','ear'];
 const planToday=()=>planDone[today()]||[];
 function markPlan(s){const t=today(),a=planDone[t]||[];if(!a.includes(s)){a.push(s);planDone[t]=a;store.set('pcz-plan',planDone)}}
 function updToday(){const t=plog[today()]||0,x=X();const a=$('todayT');if(a){a.textContent=fmt(Math.min(t,5999))+' / 5:00';$('todayP').style.width=Math.min(100,t/3)+'%';$('streakT').textContent=t>=300?x.goal+' '+x.streak(streak()):x.streak(streak())}const et=$('exToday');if(et)et.textContent=fmt(t)+' / 5:00'}
-function fiveGo(scr,plan){stopAll();if(scr==='changes')CH=null;if(scr==='ear')EAR=null;if(scr==='cards')CARD=null;FV={scr,plan:!!plan};activeTrain=!['home','notes','prog'].includes(scr)?scr:null;setMicCb();renderFive();window.scrollTo(0,0)}
-function stopAll(){stopPlay();if(PA&&PA.on)paStop();if(CH&&CH.tm){clearInterval(CH.tm)}if(YT&&YT.iv){clearInterval(YT.iv)}if(YT&&YT.player&&YT.player.pauseVideo)try{YT.player.pauseVideo()}catch(e){}}
+function fiveGo(scr,plan){stopAll();if(scr==='changes')CH=null;if(scr==='ear')EAR=null;if(scr==='deg')DQ=null;if(scr==='cards')CARD=null;FV={scr,plan:!!plan};activeTrain=!['home','notes','prog','path'].includes(scr)?scr:null;setMicCb();renderFive();window.scrollTo(0,0)}
+function stopAll(){stopPlay();if(typeof Q!=='undefined'&&Q&&Q.to)clearTimeout(Q.to);if(PA&&PA.on)paStop();if(CH&&CH.tm){clearInterval(CH.tm)}chMicOff();if(YT&&YT.iv){clearInterval(YT.iv)}if(YT&&YT.player&&YT.player.pauseVideo)try{YT.player.pauseVideo()}catch(e){}}
 function planNext(){markPlan(FV.scr==='notesEx'?'notes':FV.scr);const nx=PLAN.find(s=>!planToday().includes(s));if(!nx){fiveGo('home');return}startPlanStep(nx)}
-function startPlanStep(s){if(s==='notes'){stopAll();FV={scr:'notesEx',plan:true};activeTrain='notesEx';const d=new Date().getDate()%2;startEx(PL()==='beg'?1:PL()==='adv'?(d?0:2):d);window.scrollTo(0,0);return}if(s==='cards'&&!done.length){fiveGo('cards',true);return}fiveGo(s,true)}
+function startPlanStep(s){if(s==='notes'){FV={scr:'quest',plan:true};qBegin(qCurrent());window.scrollTo(0,0);return}if(s==='cards'&&!done.length){fiveGo('cards',true);return}fiveGo(s,true)}
 function head(title,mic){const x=X(),pd=planToday().length;return `<div class="exhead"><button id="exBack">${x.back5}</button><div class="row"><span class="muted" id="exToday"></span>${FV.plan?`<span class="chip on" style="min-height:32px">${x.planL} ${Math.min(pd+1,4)}/4</span>`:''}${mic?`<span class="micchip"><span class="dotm"></span><button data-mic></button></span>`:''}</div></div><p class="t micmsg"></p><h2 class="exT">${title}</h2>`}
 function nextBtn(){return FV.plan?`<button class="fire" id="planNext">${planToday().length>=3?X().planFinish:X().planNext}</button>`:''}
 function bindHead(){$('exBack').onclick=()=>fiveGo('home');const pn=$('planNext');if(pn)pn.onclick=planNext;updToday();micUI()}
@@ -16,7 +16,7 @@ function renderFive(){
  regN=Math.max(regN,700);const x=X(),el=$('fiveC'),s=FV.scr;
  if(s==='home'){
   const pd=planToday(),all=PLAN.every(p=>pd.includes(p)),dc=dueCards().length;
-  const stepT={changes:x.ex.changes,notes:x.ex.notes,cards:x.ex.cards,ear:x.ex.ear};
+  const stepT={changes:x.ex.changes,notes:x.ex.path,cards:x.ex.cards,ear:x.ex.ear};
   const nx=PLAN.find(p=>!pd.includes(p));
   el.innerHTML=`<h1 class="vt">${x.fiveT}</h1><p class="muted">${x.fiveSub}</p>
   <div class="panel hero"><div class="herotop"><div><div class="lbl">${x.today}</div><div class="today" id="todayT"></div></div><div class="muted" id="streakT"></div></div><div class="prog"><i id="todayP"></i></div>
@@ -24,16 +24,19 @@ function renderFive(){
   ${all?`<p class="donemsg">${x.todayDone}</p>`:`<button class="fire big" id="planGo">${pd.length?x.todayCont:x.todayGo}</button>`}</div>
   <button class="prgbtn" id="toProg"><span><b>${x.progress}</b><small>${x.progressSub}</small></span><i>›</i></button>
   <details class="more5"${all?' open':''}><summary>${x.moreEx}${dc?` <em>${x.dueN(dc)}</em>`:''}</summary>
-  <div class="exs6">${['notes','changes','along','ear','cards','yt'].map(k=>`<button class="ex" data-go="${k}"><b>${x.ex[k][0]}</b><span>${x.ex[k][1]}</span>${k==='cards'&&dc?`<em>${x.dueN(dc)}</em>`:''}</button>`).join('')}</div></details>`;
+  <div class="exs6">${['path','notes','changes','along','ear','deg','cards','yt'].map(k=>`<button class="ex" data-go="${k}"><b>${x.ex[k][0]}</b><span>${x.ex[k][1]}</span>${k==='cards'&&dc?`<em>${x.dueN(dc)}</em>`:''}</button>`).join('')}</div></details>`;
   updToday();if($('planGo'))$('planGo').onclick=()=>{if(nx)startPlanStep(nx)};$('toProg').onclick=()=>fiveGo('prog');
   el.querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>fiveGo(b.dataset.go));return;
  }
  if(s==='prog')return renderProgress();
+ if(s==='path')return renderPath();
+ if(s==='quest')return Q?qRender():renderPath();
  if(s==='notes')return renderNotesHome();
  if(s==='notesEx')return renderEx();
  if(s==='changes')return renderChanges();
  if(s==='along')return renderAlong();
  if(s==='ear')return renderEar();
+ if(s==='deg')return renderDeg();
  if(s==='cards')return renderCards();
  if(s==='yt')return renderYT();
 }
@@ -110,12 +113,14 @@ function exHear(p){const e=EX;if(!e)return;const h=$('heard');
 /* --- chord changes in one minute --- */
 const ckey=c=>c.root+'|'+c.q+'|'+c.ext;
 const pkey=(a,b)=>[ckey(a),ckey(b)].sort().join('~');
-function vFor(c){const vs=voicings(c);if(PL()==='adv'&&vs[0].l===1){const b=vs.find(v=>v.l===2);if(b)return b}return vs[0]}
+function vFor(c){const vs=voicings(c);if(typeof isSimp==='function'&&isSimp()&&view==='song')return vs.slice().sort((a,b)=>a.l-b.l)[0];if(PL()==='adv'&&vs[0].l===1){const b=vs.find(v=>v.l===2);if(b)return b}return vs[0]}
 const diff=c=>vFor(c).l;
-const XP={beg:[[2,'M',9,'M'],[2,'M',4,'M'],[9,'M',4,'M'],[9,'m',4,'M'],[0,'M',7,'M'],[7,'M',2,'M']],adv:[[5,'M',0,'M'],[11,'m',7,'M'],[5,'M',10,'M'],[11,'M',4,'M']]};
+const XP={beg:[[2,'M',9,'M'],[2,'M',4,'M'],[9,'M',4,'M'],[9,'m',4,'M'],[0,'M',7,'M'],[7,'M',2,'M']],adv:[[0,'m',5,'m'],[5,'M',10,'M'],[1,'m',8,'M'],[9,'M',2,'m'],[6,'m',1,'m'],[11,'M',4,'M'],[8,'m',1,'m']]};
+const vpos=c=>{const f=vFor(c).f.filter(x=>x>0);return f.length?Math.min(...f):0};
+const vshape=c=>{const f=vFor(c).f;return f[0]<0?'A':'E'};
 const chGoal=()=>PL()==='beg'?40:60;
-function songPairs(){analyze();const s=seqOf(A.cs);const out=new Map();for(let i=0;i<s.length;i++){const a=s[i],b=s[(i+1)%s.length];if(ckey(a)===ckey(b))continue;const k=pkey(a,b);if(!out.has(k))out.set(k,[a,b])}let L=[...out.values()];if(PL()==='beg')L=L.filter(([a,b])=>diff(a)===0&&diff(b)===0);const xp=XP[PL()];if(xp&&L.length<4)for(const [r1,q1,r2,q2] of xp){const a=C0(r1,q1),b=C0(r2,q2);if(!L.some(([x,y])=>pkey(x,y)===pkey(a,b)))L.push([a,b])}
- return L.map(([a,b])=>{const r=chRec[pkey(a,b)]||[],best=r.length?Math.max(...r.map(z=>z.n)):0;return {a,b,best,score:(diff(a)+diff(b))*30-best}}).sort((p,q)=>q.score-p.score).slice(0,6)}
+function songPairs(){analyze();const s=seqOf(A.cs);const out=new Map();for(let i=0;i<s.length;i++){const a=s[i],b=s[(i+1)%s.length];if(ckey(a)===ckey(b))continue;const k=pkey(a,b);if(!out.has(k))out.set(k,[a,b])}let L=[...out.values()];if(PL()==='beg')L=L.filter(([a,b])=>diff(a)===0&&diff(b)===0);const xp=XP[PL()];if(xp&&(L.length<4||PL()==='adv'))for(const [r1,q1,r2,q2] of xp){const a=C0(r1,q1),b=C0(r2,q2);if(!L.some(([x,y])=>pkey(x,y)===pkey(a,b))){const pr=[a,b];pr.xp=1;L.push(pr)}}
+ const out2=L.map(pr=>{const [a,b]=pr;const r=chRec[pkey(a,b)]||[],best=r.length?Math.max(...r.map(z=>z.n)):0;return {a,b,best,xp:!!pr.xp,score:(diff(a)+diff(b))*30+(PL()==='adv'?Math.abs(vpos(a)-vpos(b))*8+(vshape(a)!==vshape(b)?25:0):0)-best}}).sort((p,q)=>q.score-p.score);if(PL()!=='adv')return out2.slice(0,6);const sp=out2.filter(o=>!o.xp).slice(0,3);return sp.concat(out2.filter(o=>o.xp).slice(0,6-sp.length))}
 const BASIC=[[0,'M'],[2,'M'],[4,'M'],[5,'M'],[7,'M'],[9,'M'],[11,'M'],[9,'m'],[2,'m'],[4,'m'],[11,'m'],[0,'M','7'],[2,'M','7'],[4,'M','7'],[7,'M','7'],[9,'M','7'],[11,'M','7']].map(([r,q,e])=>C0(r,q,e||''));
 function renderChanges(){
  const x=X(),el=$('fiveC');if(!CH){const ps=songPairs();CH={a:ps[0]?ps[0].a:BASIC[0],b:ps[0]?ps[0].b:BASIC[4],ph:'setup',n:0}}
@@ -124,28 +129,39 @@ function renderChanges(){
  let body='';
  if(CH.ph==='setup'){
   const opts=sel=>uniq(BASIC.concat(A.us).map(c=>ckey(c))).map(k=>{const [r,q,e]=k.split('|');const c=C0(+r,q,e);return `<option value="${esc(k)}"${k===ckey(sel)?' selected':''}>${esc(cname(c))}</option>`}).join('');
-  body=`<p class="muted">${x.chHow}</p>${pairs.length?`<div class="lbl" style="margin-top:12px">${x.chFromSong}</div><div class="chips">${pairs.map((p,i)=>`<button class="chip${pkey(p.a,p.b)===pkey(CH.a,CH.b)?' on':''}" data-pp="${i}">${esc(cname(p.a))} ↔ ${esc(cname(p.b))}${p.best?` · ${p.best}`:''}</button>`).join('')}</div>`:''}
+  body=`<p class="muted">${x.chHow}</p>${pairs.length?`<div class="lbl" style="margin-top:12px">${x.chFromSong}</div><div class="chips">${pairs.map((p,i)=>`${p.xp&&(!i||!pairs[i-1].xp)?`</div><div class="lbl" style="margin-top:10px">${x.chHard}</div><div class="chips">`:''}<button class="chip${pkey(p.a,p.b)===pkey(CH.a,CH.b)?' on':''}" data-pp="${i}">${esc(p.xp?withFlat(false,()=>cname(p.a)):cname(p.a))} ↔ ${esc(p.xp?withFlat(false,()=>cname(p.b)):cname(p.b))}${p.best?` · ${p.best}`:''}</button>`).join('')}</div>`:''}
   <div class="row" style="margin:6px 0 14px"><span class="muted">${x.chOwn}</span><select id="chA" style="width:auto">${opts(CH.a)}</select><span>↔</span><select id="chB" style="width:auto">${opts(CH.b)}</select></div>
   <div class="pair">${dg(CH.a)}<span class="arr">↔</span>${dg(CH.b)}</div>
   <div class="goal"><div class="lbl">${x.chRec}: <b>${best||'–'}</b>${last!=null?` · ${x.chLast}: ${last}`:''} · ${x.chGoalN(G)}</div><div class="prog"><i style="width:${Math.min(100,best/G*100)}%"></i></div></div>
   <label class="sw" style="justify-content:center"><input type="checkbox" id="chF" ${CH.force?'checked':''}> <span>${x.chForce}</span></label>
+  <label class="sw" style="justify-content:center"><input type="checkbox" id="chM" ${store.get('pcz-chmic',true)?'checked':''}> <span>${x.chMicL}</span></label><p class="micmsg t center"></p>
   <button class="fire big1" id="chGo">${x.chStart}</button>`;
  }
- if(CH.ph==='run'){body=`<div class="bigtimer" id="chT">${CH.left>60?CH.left-60:CH.left}</div><p class="center">${CH.left>60?x.chReady:x.chNow(esc(cname(CH.a)),esc(cname(CH.b)))}</p><div class="pair">${dg(CH.a)}<span class="arr">↔</span>${dg(CH.b)}</div><button id="chStop">${x.stopM}</button>`}
- if(CH.ph==='enter'){body=`<h3 class="center" style="font-size:28px">${x.chHowMany}</h3><div class="row center" style="justify-content:center;margin:14px 0"><button class="sq" data-d="-5">−5</button><button class="sq" data-d="-1">−</button><output class="bignum" id="chN">${CH.n}</output><button class="sq" data-d="1">+</button><button class="sq" data-d="5">+5</button></div><p class="t center">${x.chCount}</p><div class="row" style="justify-content:center"><button class="fire" id="chSave">${x.save}</button></div>`}
+ if(CH.ph==='run'){body=`<div class="bigtimer" id="chT">${CH.left>60?CH.left-60:CH.left}</div><p class="center">${CH.left>60?x.chReady:x.chNow(esc(cname(CH.a)),esc(cname(CH.b)))}</p>${CH.mic?`<div class="chlive"><span class="dotm on"></span> ${x.chHeard} <b id="chAuto">${CH.auto||0}</b></div>`:''}<div class="pair" id="chPair">${dg(CH.a).replace('class="dgc"','class="dgc" data-w="a"')}<span class="arr">↔</span>${dg(CH.b).replace('class="dgc"','class="dgc" data-w="b"')}</div><button id="chStop">${x.stopM}</button>`}
+ if(CH.ph==='enter'){body=`<h3 class="center" style="font-size:28px">${CH.mic&&CH.lab?x.chMicSaid:x.chHowMany}</h3><div class="row center" style="justify-content:center;margin:14px 0"><button class="sq" data-d="-5">−5</button><button class="sq" data-d="-1">−</button><output class="bignum" id="chN">${CH.n}</output><button class="sq" data-d="1">+</button><button class="sq" data-d="5">+5</button></div><p class="t center">${CH.mic&&CH.lab?x.chMicFix:CH.mic?x.chMicNone:x.chCount}</p><div class="row" style="justify-content:center"><button class="fire" id="chSave">${x.save}</button></div>`}
  if(CH.ph==='saved'){body=`<div class="result"><h3>${x.chSaved(CH.n,best)}</h3><div class="prog"><i style="width:${Math.min(100,Math.max(best,CH.n)/G*100)}%"></i></div><p class="t">${x.chGoalN(G)} · ${x.chTip}</p><div class="row" style="margin-top:10px">${nextBtn()}<button id="chAgain">${x.again}</button><button id="chOther">${x.chOther}</button></div></div>`}
  el.innerHTML=head(x.ex.changes[0])+body;bindHead();
  el.querySelectorAll('[data-pp]').forEach(b=>b.onclick=()=>{const p=pairs[+b.dataset.pp];CH.a=p.a;CH.b=p.b;renderChanges()});
  const fromKey=k=>{const [r,q,e]=k.split('|');return C0(+r,q,e)};
  if($('chA')){$('chA').onchange=e=>{CH.a=fromKey(e.target.value);renderChanges()};$('chB').onchange=e=>{CH.b=fromKey(e.target.value);renderChanges()}}
- if($('chGo'))$('chGo').onclick=()=>{try{actx()}catch(e){}CH.ph='run';CH.left=63;renderChanges();CH.tm=setInterval(()=>{CH.left--;try{if(CH.left>60||CH.left===0||CH.force)click(ac.currentTime+.01,CH.left===0||CH.left===60)}catch(e){}if(CH.left<=0){clearInterval(CH.tm);CH.ph='enter';CH.n=last||20;renderChanges();return}const t=$('chT');if(t)t.textContent=CH.left>60?CH.left-60:CH.left;if(CH.left===60)renderChanges()},1000)};
+ if($('chM'))$('chM').onchange=e=>store.set('pcz-chmic',e.target.checked);
+ if($('chGo'))$('chGo').onclick=async()=>{try{actx()}catch(e){}CH.mic=false;CH.auto=0;CH.lab=null;CH.cand=null;CH.run=0;
+  if(store.get('pcz-chmic',true)){Mic.cb=null;if(await micStart()){CH.mic=true;Mic.ccb=chHear}}
+  CH.ph='run';CH.left=63;renderChanges();CH.tm=setInterval(()=>{CH.left--;try{if(CH.left>60||CH.left===0||CH.force)click(ac.currentTime+.01,CH.left===0||CH.left===60)}catch(e){}if(CH.left<=0){clearInterval(CH.tm);chMicOff();CH.ph='enter';CH.n=CH.mic&&CH.lab?CH.auto:(last||20);renderChanges();return}const t=$('chT');if(t)t.textContent=CH.left>60?CH.left-60:CH.left;if(CH.left===60)renderChanges()},1000)};
  if($('chF'))$('chF').onchange=e=>{CH.force=e.target.checked};
- if($('chStop'))$('chStop').onclick=()=>{clearInterval(CH.tm);CH.ph='setup';renderChanges()};
+ if($('chStop'))$('chStop').onclick=()=>{clearInterval(CH.tm);chMicOff();CH.ph='setup';renderChanges()};
  el.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{CH.n=Math.max(0,CH.n+ +b.dataset.d);$('chN').textContent=CH.n});
  if($('chSave'))$('chSave').onclick=()=>{const k=pkey(CH.a,CH.b);(chRec[k]=chRec[k]||[]).push({d:today(),n:CH.n});chRec[k]=chRec[k].slice(-30);store.set('pcz-ch',chRec);CH.ph='saved';if(FV.plan)markPlan('changes');renderChanges()};
  if($('chAgain'))$('chAgain').onclick=()=>{CH.ph='setup';renderChanges()};if($('chOther'))$('chOther').onclick=()=>{CH=null;renderChanges()};
 }
 
+function chMicOff(){if(Mic.ccb){Mic.ccb=null;micStop()}}
+function chHear(ch,r){
+ if(!CH||CH.ph!=='run'||CH.left>60||r<0.0035)return;
+ const sa=chordFit(ch,CH.a),sb=chordFit(ch,CH.b),lab=sa>sb+.05?'a':sb>sa+.05?'b':null;if(!lab)return;
+ if(lab===CH.cand)CH.run++;else{CH.cand=lab;CH.run=1}
+ if(CH.run>=3&&lab!==CH.lab){if(CH.lab)CH.auto++;CH.lab=lab;const o=$('chAuto');if(o)o.textContent=CH.auto;document.querySelectorAll('#chPair [data-w]').forEach(d=>d.classList.toggle('hot',d.dataset.w===lab))}
+}
 /* --- play along --- */
 const PATS={doby:'D-D-D-D-',tabor:'D-DU-UDU',osm:'DUDUDUDU',valcik:'D-D-D-'};
 function renderAlong(){
@@ -202,6 +218,36 @@ function renderEar(){
  bindHead();
  el.querySelectorAll('[data-id]').forEach(b=>b.onclick=()=>{if(EAR.ans)return;EAR.ans=b.dataset.id;EAR.n++;if(EAR.ans===EAR.t)EAR.ok++;{const d=today(),v=earSt[d]||[0,0];v[1]++;if(EAR.ans===EAR.t)v[0]++;earSt[d]=v;store.set('pcz-ear',earSt)}if(EAR.n>=5&&FV.plan)markPlan('ear');renderEar()});
  if($('earNext'))$('earNext').onclick=()=>{EAR.prev=EAR.t;EAR.t=null;renderEar()};
+}
+
+/* --- ear: scale degrees (functional ear training) --- */
+let DQ=null,degSt=store.get('pcz-deg',{});
+const DLAB=['1','♭2','2','♭3','3','4','♯4','5','♭6','6','♭7','7'];
+function degSet(k){const sc=k.minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11];return level==='beg'?[0,k.minor?3:4,7]:level==='adv'?[0,1,2,3,4,5,6,7,8,9,10,11]:sc}
+function degPlay(cad){stopPlay();try{actx()}catch(e){return}master=ac.createGain();master.gain.value=.7;master.connect(ac.destination);let t=ac.currentTime+.06;
+ if(cad){for(const c of DQ.cad){strum(c,t,'D',.2);t+=.8}t+=.4}note(DQ.base+DQ.t,t,.6,master,1.8)}
+function degResolve(){const k=DQ.k,sc=k.minor?[0,2,3,5,7,8,10]:[0,2,4,5,7,9,11],d=DQ.t,path=[d];
+ if(d>6){for(const x of sc.concat(12))if(x>d)path.push(x)}else{for(const x of sc.slice().reverse())if(x<d)path.push(x)}
+ if(path[path.length-1]!==0&&path[path.length-1]!==12)path.push(d>6?12:0);play(path.map(x=>DQ.base+x),null,.42,true)}
+function renderDeg(){
+ const x=X(),el=$('fiveC');analyze();
+ if(!DQ){const k=A.k||{t:0,minor:false},q=k.minor?'m':'M';DQ={k,n:0,ok:0,t:null,ans:null,base:55+((k.t-7+12)%12),cad:[C0(k.t,q),C0(k.t+5,q),C0(k.t+7,'M'),C0(k.t,q)]}}
+ const k=DQ.k,opts=degSet(k);
+ if(DQ.t==null){let t;do{t=opts[Math.floor(Math.random()*opts.length)]}while(t===DQ.prev&&opts.length>1);DQ.t=t;DQ.ans=null;setTimeout(()=>degPlay(DQ.n===0||DQ.newKey),250);DQ.newKey=false}
+ const nm=d=>x.degN[d]||'';
+ el.innerHTML=head(x.ex.deg[0])+`<p class="muted">${x.degHow(keyName(k))}</p>
+ <div class="row" style="margin:12px 0"><button class="fire" id="dgCad">${x.degCad}</button><button id="dgNote">${x.degNote}</button></div>
+ <div class="earb deg">${opts.map(d=>`<button data-dg="${d}" class="${DQ.ans!=null?d===DQ.t?'ok':d===DQ.ans?'no':'':''}"><b>${DLAB[d]}</b><small>${nm(d)}</small></button>`).join('')}</div>
+ <p class="qfb">${DQ.ans!=null?(DQ.ans===DQ.t?x.right:x.degWas(DLAB[DQ.t]))+' '+x.degWhy[DQ.t]:''}</p>
+ <div class="score"><span>${x.accL}: <b>${DQ.n?Math.round(DQ.ok/DQ.n*100):0} %</b></span><span>${DQ.n}×</span></div>
+ ${DQ.ans!=null?`<div class="row" style="margin-top:12px"><button id="dgRes">${x.degRes}</button><button class="pri" id="dgNext">${x.next1}</button></div>`:''}
+ <p class="t" style="margin-top:14px">${x.degTip}</p>`;
+ bindHead();
+ $('dgCad').onclick=()=>degPlay(true);$('dgNote').onclick=()=>degPlay(false);
+ el.querySelectorAll('[data-dg]').forEach(b=>b.onclick=()=>{if(DQ.ans!=null){note(DQ.base+ +b.dataset.dg,actx().currentTime+.02,.6,ac.destination,1.2);return}DQ.ans=+b.dataset.dg;DQ.n++;if(DQ.ans===DQ.t)DQ.ok++;
+  const d=today(),v=degSt[d]||[0,0];v[1]++;if(DQ.ans===DQ.t)v[0]++;degSt[d]=v;store.set('pcz-deg',degSt);renderDeg();setTimeout(degResolve,150)});
+ if($('dgRes'))$('dgRes').onclick=degResolve;
+ if($('dgNext'))$('dgNext').onclick=()=>{DQ.prev=DQ.t;DQ.t=null;renderDeg()};
 }
 
 /* --- cards --- */
@@ -275,8 +321,8 @@ function renderProgress(){
  const recs=Object.entries(chRec).map(([k,r])=>({k,best:Math.max(...r.map(z=>z.n)),last:r[r.length-1].n,r})).sort((a,b)=>b.best-a.best).slice(0,5);
  const mx=Math.max(1,...recs.map(r=>r.best));
  const pkName=k=>k.split('~').map(p=>{const [r,q,e]=p.split('|');const c={root:+r,q,ext:e||''};try{return esc(cname(c))}catch(err){return esc(p)}}).join(' ↔ ');
- const ev=Object.values(earSt),eo=ev.reduce((a,v)=>a+v[0],0),en=ev.reduce((a,v)=>a+v[1],0);
- const recent=Object.keys(earSt).sort().slice(-7).reduce((a,k)=>[a[0]+earSt[k][0],a[1]+earSt[k][1]],[0,0]);
+ const ev=Object.values(earSt).concat(Object.values(degSt)),eo=ev.reduce((a,v)=>a+v[0],0),en=ev.reduce((a,v)=>a+v[1],0);
+ const allE={};for(const S2 of [earSt,degSt])for(const [k,v] of Object.entries(S2)){const a=allE[k]||[0,0];allE[k]=[a[0]+v[0],a[1]+v[1]]}const recent=Object.keys(allE).sort().slice(-7).reduce((a,k)=>[a[0]+allE[k][0],a[1]+allE[k][1]],[0,0]);
  let mk=0,mn=0,marks=[];for(let s2=0;s2<6;s2++)for(let f=0;f<=12;f++){const pc=(OPEN[s2]+f)%12;if(!NAT.includes(pc))continue;mn++;const m=mast(s2,f);if(m===3)mk++;if(m)marks.push({s:s2,f,k:'h'+m,t:nn(pc)})}
  const all=[...mine,...EXAMPLES],rc=[0,0,0,0];all.forEach(s2=>rc[rep[s2.id]||0]++);
  const lvl=v=>v>=300?4:v>=180?3:v>=60?2:v>0?1:0;
@@ -287,6 +333,7 @@ function renderProgress(){
   <div class="panel stat"><span class="lbl">${x.pWeek}</span><b>${Math.round(wk/60)}</b><small>min · ${x.pTotal} ${x.pMin(Math.round(tot/60))}</small></div>
  </div>
  <div class="panel"><div class="lbl">${x.pDays}</div><div class="heat">${dw.map(w=>`<span class="hw">${w}</span>`).join('')}${days.map(z=>`<i class="h${z.fut?'f':lvl(z.v)}${z.t?' ht':''}" title="${z.k}: ${Math.round(z.v/60)} min"></i>`).join('')}</div></div>
+ <div class="panel"><div class="lbl">${x.qPathT} · ${x.qStarsT(QD.reduce((a,d)=>a+qStars(d.id),0),QD.length*3)}</div>${QT.length?`<div class="qchart">${QT.slice(-12).map(r=>`<i style="height:${Math.max(4,r.sc)}%" title="${r.d}: ${r.sc}"></i>`).join('')}</div><p class="t">${x.qTest}: ${QT.map(r=>r.sc).slice(-6).join(' → ')}</p>`:`<p class="t">${x.qTestNone}</p>`}</div>
  <div class="panel"><div class="lbl">${x.pLessons} · ${done.length}/${L.length||12}</div>${byCh.map(c=>`<div class="bar"><span>${esc(c.n)}</span><div class="prog"><i style="width:${c.all?c.d/c.all*100:0}%"></i></div><b>${c.d}/${c.all}</b></div>`).join('')}
   <p class="t">${x.pCards}: <b>${known}</b> / ${done.length}</p></div>
  <div class="panel"><div class="lbl">${x.pRec}</div>${recs.length?recs.map(r=>`<div class="bar"><span>${pkName(r.k)}</span><div class="prog"><i style="width:${r.best/mx*100}%"></i></div><b>${r.best}</b></div>`).join(''):`<p class="t">${x.pNone}</p>`}</div>
