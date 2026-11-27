@@ -195,3 +195,4 @@ sg3T:'Add some spice.',sg3:e=>`The scale adds <b>${e}</b>. More interesting but 
 sg4T:'Aim for chord tones.',sg4:'When the chord changes, play one of its notes. That makes the solo sit on the backing:',
 sg5T:'Recipe:',sg5:h=>`a short pentatonic phrase → a rest → land on a chord tone at the change → end on <b>${h}</b>. Start with just 3 notes and play slowly.`});
 for(const L of [S.cs,S.en])for(const k in L)if(typeof L[k]==='string')L[k]=L[k].replace(/▶(?!\uFE0E)/g,'▶\uFE0E');
+Object.assign(S.cs,{micStall:'Mikrofon se zasekl. Ťukni kamkoli na obrazovku a znovu se spustí.'});Object.assign(S.en,{micStall:'The microphone got stuck. Tap anywhere on the screen to restart it.'});

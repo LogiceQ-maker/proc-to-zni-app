@@ -1,6 +1,6 @@
 'use strict';
 /* ---------- feedback, microphone help, beginner encouragement ---------- */
-const APP_VER='v8';
+const APP_VER='v9';
 const FEEDBACK_EMAIL=''; // put your e-mail here to also offer "send by e-mail"
 if(!store.get('pcz-first',null))store.set('pcz-first',today());
 

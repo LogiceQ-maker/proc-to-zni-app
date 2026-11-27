@@ -161,8 +161,12 @@ const seq=()=>seqOf(A.cs).slice(0,16);
 
 /* ---------- sound ---------- */
 let ac=null,master=null,playT=[];const bufs={};
-function aSess(t){try{if(navigator.audioSession&&navigator.audioSession.type!==t)navigator.audioSession.type=t}catch(e){}}
-function actx(){if(!ac){aSess('playback');ac=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'})}if(ac.state!=='running')try{ac.resume()}catch(e){}return ac}
+/* iPhone audio session: switching its type while sound is running interrupts the AudioContext
+   (then the mic delivers silence and the tuner hears nothing). So it is set ONCE, before the first sound,
+   to 'play-and-record': plays even with the silent switch on, and the mic works without any switching. */
+let sessSet=false;
+function aSess(){if(sessSet)return;sessSet=true;try{if(navigator.audioSession)navigator.audioSession.type='play-and-record'}catch(e){}}
+function actx(){if(!ac){aSess();ac=new (window.AudioContext||window.webkitAudioContext)({latencyHint:'interactive'})}if(ac.state!=='running')try{ac.resume()}catch(e){}return ac}
 /* iPhone: Web Audio is muted by the silent switch and starts suspended. Unlock on the first touch:
    - audioSession 'playback' (iOS 17+) ignores the silent switch
    - a short silent <audio> element does the same on older iOS
@@ -171,7 +175,7 @@ const SILENT='data:audio/wav;base64,UklGRmQGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAAB
 let silentEl=null;
 /* iPhone silent switch: Web Audio follows the ringer unless an HTML <audio> element is *playing*.
    So a silent track loops quietly the whole time the app is open (paused when the app is hidden). */
-function unlockAudio(){try{actx();if(!Mic.stream)aSess('playback');
+function unlockAudio(){try{if(Mic.stalled){Mic.stalled=false;micRecover();return}actx();
  if(!silentEl){silentEl=new Audio(SILENT);silentEl.loop=true;silentEl.setAttribute('playsinline','');silentEl.setAttribute('x-webkit-airplay','deny');silentEl.preload='auto';silentEl.volume=.01}
  if(silentEl.paused){const pr=silentEl.play();if(pr&&pr.catch)pr.catch(()=>{})}
  if(ac.state!=='running')ac.resume()}catch(e){}}
@@ -242,7 +246,6 @@ function micUI(){document.querySelectorAll('[data-mic]').forEach(b=>{const tun=b
 let micKeep=0;
 async function getMicStream(){
  if(Mic.stream&&Mic.stream.getTracks().some(t=>t.readyState==='live'))return Mic.stream;
- aSess('play-and-record');
  const st=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
  Mic.stream=st;store.set('pcz-mic','ok');return st;
 }
@@ -254,10 +257,19 @@ async function micStart(){
   Mic.src=ac.createMediaStreamSource(st);Mic.an=ac.createAnalyser();Mic.an.fftSize=8192;Mic.src.connect(Mic.an);Mic.an2=ac.createAnalyser();Mic.an2.fftSize=4096;Mic.an2.smoothingTimeConstant=0;Mic.src.connect(Mic.an2);Mic.buf=new Float32Array(Mic.an.fftSize);Mic.on=true;Mic.t=setInterval(micTick,40);micUI();return true}
  catch(e){micMsg(e&&(e.name==='NotAllowedError'||e.name==='SecurityError')?X().micDenied:X().micNA);return false}
 }
-function micRelease(){try{if(Mic.stream)Mic.stream.getTracks().forEach(t=>t.stop())}catch(e){}Mic.stream=null;aSess('playback')}
+async function micRecover(){
+ // full restart inside a tap: new AudioContext + new mic stream
+ const cb=Mic.cb,ccb=Mic.ccb;try{clearInterval(Mic.t);Mic.src&&Mic.src.disconnect()}catch(e){}Mic.on=false;micRelease();
+ try{if(ac){const old=ac;ac=null;master=null;old.close().catch(()=>{})}}catch(e){}actx();
+ micMsg('');
+ if(await micStart()){Mic.cb=cb;Mic.ccb=ccb;Mic.zero=0}
+}
+function micRelease(){try{if(Mic.stream)Mic.stream.getTracks().forEach(t=>t.stop())}catch(e){}Mic.stream=null}
 function micStop(){if(!Mic.on)return;clearInterval(Mic.t);try{Mic.src.disconnect()}catch(e){}Mic.on=false;micUI();clearTimeout(micKeep);micKeep=setTimeout(()=>{if(!Mic.on)micRelease()},90000)}
 document.addEventListener('visibilitychange',()=>{if(document.hidden&&!Mic.on)micRelease()});
 function micTick(){Mic.an.getFloatTimeDomainData(Mic.buf);
+ {let z=true,sum=0;const b=Mic.buf;for(let i=b.length-512;i<b.length;i++){if(b[i]!==0)z=false;sum+=b[i]*(i%7+1)}const frozen=sum===Mic.lastSum;Mic.lastSum=sum;
+  Mic.zero=(z||frozen||ac.state!=='running')?(Mic.zero||0)+1:0;if(Mic.zero===30){Mic.stalled=true;micMsg(X().micStall);if(typeof toast==='function')toast(X().micStall)}}
  if(Mic.ccb){let r=0;const b=Mic.buf;for(let i=b.length-2048;i<b.length;i++)r+=b[i]*b[i];r=Math.sqrt(r/2048);const pr=Mic.crms||0;Mic.crms=r;Mic.ccb(chroma(Mic.fast?Mic.an2:Mic.an),r,r>pr*1.6&&r>0.004);return}
  const p=pitch(Mic.buf,ac.sampleRate,Mic.minHz);if(Mic.cb)Mic.cb(p)}
 /* ---------- chord hearing: which of the 12 notes are sounding ---------- */
